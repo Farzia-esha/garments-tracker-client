@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Menu, X, User, LogOut, LayoutDashboard, Home, Package, Mail, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Logo from '../Logo/Logo';
-import { NavLink } from 'react-router';
 import useAuth from '../../hooks/useAuth';
 
 const Navbar = () => {
