@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Menu, X, ShoppingBag, User, LogOut, LayoutDashboard, Home, Package, Mail, Info } from 'lucide-react';
+import { Menu, X, User, LogOut, LayoutDashboard, Home, Package, Mail, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Logo from '../Logo/Logo';
+import { NavLink } from 'react-router';
 
 const mockUser = {
   name: "mr.x",
@@ -43,8 +45,7 @@ const Navbar = () => {
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center space-x-2 cursor-pointer"
           >
-            <ShoppingBag className="text-white" size={32} />
-            <span className="text-4xl font-bold text-white">Garment<span className='text-yellow-400 text-xl py-2'>Track</span></span>
+            <Logo></Logo>
           </motion.div>
 
           {/* (Desktop) */}

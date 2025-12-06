@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 import { ShoppingBag, Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
+import Logo from '../Logo/Logo';
 
 
 const Footer = () => {
@@ -10,7 +11,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
           <div>
-            <div className="flex items-center space-x-2 mb-4">
+            {/* <div className="flex items-center space-x-2 mb-4">
               <div className="p-2 bg-yellow-500 rounded-lg">
                 <ShoppingBag className="w-6 h-6 text-black" />
               </div>
@@ -18,7 +19,8 @@ const Footer = () => {
                 <h3 className="text-3xl font-bold">Garment<span className="text-yellow-400 text-[18px] py-2">Track</span></h3>
                 <p className="text-xs text-gray-400">Smart Production System</p>
               </div>
-            </div>
+            </div> */}
+            <Logo></Logo>
 
             <p className="text-gray-400 text-sm leading-relaxed mb-4">
               A complete production and order tracking solution for garment factories. Manage workflow effortlessly with real-time monitoring.
