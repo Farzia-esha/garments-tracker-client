@@ -3,21 +3,15 @@ import { Menu, X, User, LogOut, LayoutDashboard, Home, Package, Mail, Info } fro
 import { motion, AnimatePresence } from 'framer-motion';
 import Logo from '../Logo/Logo';
 import { NavLink } from 'react-router';
-
-const mockUser = {
-  name: "mr.x",
-  email: "mr@example.com",
-  photoURL: "https://i.pravatar.cc/150?img=12",
-  role: "buyer"
-};
+import useAuth from '../../hooks/useAuth';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const toggleMenu = () => setIsOpen(!isOpen);
-  const toggleLogin = () => setIsLoggedIn(!isLoggedIn);
-  
-  // Before Login
+  const { user, logOut } = useAuth();
+  const isLoggedIn = !!user;
+
+  // Before Login Links
   const beforeLoginLinks = [
     { name: 'Home', path: '/', icon: <Home size={18} /> },
     { name: 'All Products', path: '/all-products', icon: <Package size={18} /> },
@@ -25,7 +19,7 @@ const Navbar = () => {
     { name: 'Contact', path: '/contact', icon: <Mail size={18} /> }
   ];
 
-  //After Login
+  // After Login Links
   const afterLoginLinks = [
     { name: 'Home', path: '/', icon: <Home size={18} /> },
     { name: 'All Products', path: '/all-products', icon: <Package size={18} /> },
@@ -34,21 +28,25 @@ const Navbar = () => {
 
   const navLinks = isLoggedIn ? afterLoginLinks : beforeLoginLinks;
 
+  const handleLogout = async () => {
+    await logOut();
+  };
+
   return (
     <nav className="bg-gradient-to-r from-indigo-600 via-sky-600 to-indigo-600 shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          
-          {/* Left Side*/}
+
+          {/* Left: Logo */}
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center space-x-2 cursor-pointer"
+            className="flex items-center cursor-pointer"
           >
-            <Logo></Logo>
+            <Logo />
           </motion.div>
 
-          {/* (Desktop) */}
+          {/* Desktop Menu */}
           <div className="hidden lg:flex items-center space-x-1">
             {navLinks.map((link, index) => (
               <motion.a
@@ -64,57 +62,51 @@ const Navbar = () => {
               </motion.a>
             ))}
 
-            {/* Before Login: Login & Register Buttons */}
+            {/* Before Login */}
             {!isLoggedIn && (
               <>
-                <motion.a
-                  href="/login"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-5 py-2 text-white border-2 border-white rounded-lg hover:bg-white hover:text-indigo-600 transition-all duration-300 font-semibold ml-2"
+                <a href="/login"
+                  className="px-5 py-2 text-white border-2 border-white rounded-lg hover:bg-white hover:text-indigo-600 transition font-semibold ml-2"
                 >
                   Login
-                </motion.a>
-                <motion.a
-                  href="/register"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-5 py-2 bg-white text-indigo-600 rounded-lg hover:bg-yellow-300 transition-all duration-300 font-bold shadow-lg"
+                </a>
+
+                <a href="/register"
+                  className="px-5 py-2 bg-white text-indigo-600 rounded-lg hover:bg-yellow-300 transition font-bold shadow-lg"
                 >
                   Register
-                </motion.a>
+                </a>
               </>
             )}
 
-            {/* After Login: User Avatar & Logout */}
+            {/* After Login */}
             {isLoggedIn && (
               <div className="flex items-center space-x-3 ml-4">
+
                 <div className="dropdown dropdown-end">
                   <motion.div 
                     tabIndex={0} 
                     whileHover={{ scale: 1.1 }}
                     className="avatar cursor-pointer"
-                    title={mockUser.name}
                   >
                     <div className="w-11 h-11 rounded-full ring ring-white ring-offset-2 ring-offset-purple-600">
-                      <img src={mockUser.photoURL} alt={mockUser.name} />
+                      <img src={user?.photoURL} alt="avatar" />
                     </div>
                   </motion.div>
-                  <ul tabIndex={0} className="dropdown-content z-[1] menu p-3 shadow-2xl bg-white rounded-xl w-64 mt-3">
+
+                  <ul tabIndex={0} className="dropdown-content menu p-3 shadow-2xl bg-white rounded-xl w-64 mt-3">
                     <li className="px-4 py-3 border-b border-gray-200">
                       <div className="flex items-center gap-3">
-                        <img src={mockUser.photoURL} alt={mockUser.name} className="w-12 h-12 rounded-full" />
-                        <div className="flex flex-col">
-                          <span className="font-bold text-gray-800">{mockUser.name}</span>
-                          <span className="text-xs text-gray-500">{mockUser.email}</span>
-                          <span className="text-xs bg-indigo-100 text-indigo-600 px-2 py-1 rounded mt-1 w-fit capitalize font-semibold">
-                            {mockUser.role}
-                          </span>
+                        <img src={user?.photoURL} className="w-12 h-12 rounded-full" />
+                        <div>
+                          <span className="font-bold text-gray-800">{user?.displayName}</span>
+                          <span className="text-xs text-gray-500">{user?.email}</span>
                         </div>
                       </div>
                     </li>
+
                     <li>
-                      <a href="/dashboard/profile" className="flex items-center gap-2 hover:bg-indigo-50 text-gray-700 py-2">
+                      <a href="/dashboard/profile" className="flex items-center gap-2 hover:bg-indigo-50 py-2 text-gray-700">
                         <User size={18} />
                         My Profile
                       </a>
@@ -122,93 +114,79 @@ const Navbar = () => {
                   </ul>
                 </div>
 
-                {/* Logout Button */}
-                <motion.button
-                  onClick={toggleLogin}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-300 font-semibold flex items-center gap-2 shadow-lg"
+                {/* Logout */}
+                <button
+                  onClick={handleLogout}
+                  className="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition font-semibold flex items-center gap-2 shadow-lg"
                 >
                   <LogOut size={18} />
                   Logout
-                </motion.button>
+                </button>
               </div>
             )}
-
-            {/* Demo Toggle */}
-            <button
-              onClick={toggleLogin}
-              className="ml-2 px-3 py-1 text-xs bg-yellow-400 text-gray-800 rounded-full font-bold hover:bg-yellow-300 shadow-md"
-            >
-              {isLoggedIn ? 'after' : 'before'}
-            </button>
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="lg:hidden flex items-center gap-2">
-            <button onClick={toggleMenu} className="text-white focus:outline-none">
+          {/* Mobile Hamburger */}
+          <div className="lg:hidden flex items-center">
+            <button onClick={toggleMenu} className="text-white">
               {isOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
+        {/* Mobile Menu */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
+              animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               className="lg:hidden pb-4"
             >
               <div className="flex flex-col space-y-2">
-                {/* Navigation Links */}
                 {navLinks.map((link) => (
                   <a
                     key={link.name}
                     href={link.path}
-                    className="text-white hover:bg-white/20 px-4 py-3 rounded-lg transition-colors flex items-center gap-2 font-medium"
+                    className="text-white hover:bg-white/20 px-4 py-3 rounded-lg flex items-center gap-2 font-medium"
                   >
                     {link.icon}
                     {link.name}
                   </a>
                 ))}
-                
-                {/* Before Login - Mobile */}
+
+                {/* Before Login Mobile */}
                 {!isLoggedIn && (
                   <>
-                    <a href="/login" className="text-white hover:bg-white/20 px-4 py-3 rounded-lg font-semibold border-2 border-white text-center">
+                    <a href="/login" className="text-white px-4 py-3 border-2 border-white rounded-lg text-center">
                       Login
                     </a>
-                    <a href="/register" className="bg-white text-indigo-600 px-4 py-3 rounded-lg font-bold text-center shadow-lg">
+                    <a href="/register" className="bg-white text-indigo-600 px-4 py-3 rounded-lg font-bold text-center">
                       Register
                     </a>
                   </>
                 )}
-                
-                {/* After Login - Mobile */}
+
+                {/* After Login Mobile */}
                 {isLoggedIn && (
                   <div className="px-4 py-3 bg-white/10 rounded-lg">
                     <div className="flex items-center space-x-3 mb-3">
-                      <img src={mockUser.photoURL} alt={mockUser.name} className="w-12 h-12 rounded-full ring ring-white" />
+                      <img src={user?.photoURL} className="w-12 h-12 rounded-full ring ring-white" />
                       <div>
-                        <p className="text-white font-bold">{mockUser.name}</p>
-                        <p className="text-white/70 text-xs">{mockUser.email}</p>
-                        <span className="text-xs bg-white text-indigo-600 px-2 py-1 rounded mt-1 inline-block capitalize font-semibold">
-                          {mockUser.role}
-                        </span>
+                        <p className="text-white font-bold">{user?.displayName}</p>
+                        <p className="text-white/70 text-xs">{user?.email}</p>
                       </div>
                     </div>
-                    <a href="/dashboard/profile" className="flex items-center gap-2 text-white hover:text-yellow-300 mb-2 py-2">
-                      <User size={18} />
-                      My Profile
+
+                    <a href="/dashboard/profile" className="flex items-center gap-2 text-white mb-2">
+                      <User size={18} /> My Profile
                     </a>
-                    <button 
-                      onClick={toggleLogin}
-                      className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2"
+
+                    <button
+                      onClick={handleLogout}
+                      className="w-full bg-red-500 text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2"
                     >
-                      <LogOut size={18} />
-                      Logout
+                      <LogOut size={18} /> Logout
                     </button>
                   </div>
                 )}
@@ -222,4 +200,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

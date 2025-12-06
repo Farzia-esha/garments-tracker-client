@@ -1,70 +1,199 @@
-import React from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
 import Swal from "sweetalert2";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase/firebase.init";
+import useAuth from "../../hooks/useAuth";
+import { Mail, Lock, Eye, EyeOff, Chrome, ShoppingBag, XCircle } from 'lucide-react';
+import { useState } from "react";
+import Logo from "../../Components/Logo/Logo";
 
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
+  const { signInUser, signInGoogle } = useAuth();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = async (data) => {
-    const { email, password } = data;
-
+    setIsLoading(true);
     try {
-      // Firebase authentication
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInUser(data.email, data.password);
 
       Swal.fire({
         icon: "success",
-        title: "Login Successful",
-        text: "Welcome back!",
+        title: "Welcome Back!",
+        text: "Login successful",
+        showConfirmButton: false,
+        timer: 1500,
       });
 
-      navigate("/"); // Redirect to home/dashboard
+      navigate("/");
     } catch (error) {
       Swal.fire({
         icon: "error",
         title: "Login Failed",
         text: "Invalid email or password",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      const result = await signInGoogle();
+
+      await fetch('http://localhost:3000/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: result.user.email,
+          name: result.user.displayName,
+          photoURL: result.user.photoURL,
+          role: 'buyer',
+          status: 'pending'
+        })
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Welcome!",
+        showConfirmButton: false,
+        timer: 1500
+      });
+
+      navigate("/");
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Google Login Failed",
+        text: error.message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+    const currentYear = new Date().getFullYear();
+
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            {...register("email", { required: "Email is required" })}
-            className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          />
-          {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+    <div className="min-h-screen bg-gray-500 flex items-center justify-center py-12 px-4">
+      
+      <div className="max-w-md w-full">
+        
+        {/* Logo */}
+        <div className="text-center mb-5 "> 
+          <div className="inline-flex items-center justify-center mb-4">
+            <Logo></Logo>
+          </div>
+        <h1 className="text-4xl font-bold text-white mt-2">Welcome Back!</h1>
+          <p className="text-white">Login to access your account</p>          
+        </div>
 
-          <input
-            type="password"
-            placeholder="Password"
-            {...register("password", { required: "Password is required" })}
-            className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          />
-          {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-2xl p-8">
 
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="email"
+                  {...register("email", { 
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address"
+                    }
+                  })}
+                  className={`w-full pl-11 pr-4 py-3 border-2 ${
+                    errors.email ? 'border-red-500' : 'border-gray-200'
+                  } rounded-xl focus:border-indigo-600 focus:outline-none`}
+                  placeholder="your@email.com"
+                />
+              </div>
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                  <XCircle size={16} />
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  {...register("password", { required: "Password is required" })}
+                  className={`w-full pl-11 pr-12 py-3 border-2 ${
+                    errors.password ? 'border-red-500' : 'border-gray-200'
+                  } rounded-xl focus:border-indigo-600 focus:outline-none`}
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                  <XCircle size={16} />
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
+
+            {/* Login Button */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-bold text-lg shadow-lg disabled:opacity-50"
+            >
+              {isLoading ? "Logging in..." : "Login"}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="flex items-center gap-4 my-6">
+            <div className="flex-1 h-px bg-gray-200"></div>
+            <span className="text-sm text-gray-500 font-semibold">OR</span>
+            <div className="flex-1 h-px bg-gray-200"></div>
+          </div>
+
+          {/* Google Login */}
           <button
-            type="submit"
-            className="w-full py-3 bg-indigo-600 font-bold text-white rounded-lg hover:bg-indigo-700 transition"
+            onClick={handleGoogleLogin}
+            disabled={isLoading}
+            className="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-200 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
           >
-            Login
+            <Chrome size={20} className="text-red-500" />
+            Continue with Google
           </button>
-        </form>
-        <p className="text-center mt-4">
-          Don't have an account?{" "}
-          <Link to="/register" className="text-indigo-600 font-semibold hover:underline">
-            Register
-          </Link>
+
+          {/* Register Link */}
+          <p className="text-center mt-6 text-gray-600">
+            Don't have an account?{" "}
+            <Link to="/register" className="text-indigo-600 font-bold">
+              Register Now
+            </Link>
+          </p>
+        </div>
+        <p className="text-center mt-6 text-white text-sm">
+          ©{currentYear} Garment<span className="text-yellow-400">Track</span>. All rights reserved.
         </p>
       </div>
     </div>
