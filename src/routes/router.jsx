@@ -5,6 +5,8 @@ import AuthLayout from "../Layouts/AuthLayout";
 import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
 import ProductDetails from "../pages/Home/ProductDetails";
+import AllProducts from "../pages/Product/AllProducts";
+import PrivateRoute from "../contexts/PrivateRoute";
 
 export const router = createBrowserRouter([
   {
@@ -16,8 +18,13 @@ export const router = createBrowserRouter([
             Component:Home
         },
         {
+          path:'all-products',
+          Component: AllProducts,
+
+        },
+        {
             path:'/product/:id',
-            Component: ProductDetails
+            element:<PrivateRoute><ProductDetails></ProductDetails></PrivateRoute>
         }
     ]
   },
