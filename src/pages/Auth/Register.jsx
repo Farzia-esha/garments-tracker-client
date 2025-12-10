@@ -3,9 +3,10 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import useAuth from "../../hooks/useAuth";
-import { motion } from 'framer-motion';
-import { Mail, Lock, User, Image, Eye, EyeOff, Chrome, ShoppingBag, XCircle, CheckCircle } from 'lucide-react';
+import { Mail, Lock, User, Image, Eye, EyeOff } from "lucide-react";
 import Logo from "../../Components/Logo/Logo";
+import { FcGoogle } from "react-icons/fc";
+import axios from "axios";
 
 const Register = () => {
   const { register, handleSubmit, formState: { errors }, watch } = useForm();
@@ -13,334 +14,267 @@ const Register = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
   const password = watch("password", "");
-  
+
   const passwordStrength = {
     hasUpperCase: /[A-Z]/.test(password),
     hasLowerCase: /[a-z]/.test(password),
     hasMinLength: password.length >= 6
   };
 
+  const imageKey = import.meta.env.VITE_IMGBB_KEY;
+
   const onSubmit = async (data) => {
     setIsLoading(true);
+
     try {
+      let uploadedImageUrl = "";
+      if (data.photo?.[0]) {
+        const formData = new FormData();
+        formData.append("image", data.photo[0]);
+
+        const uploadRes = await axios.post(
+          `https://api.imgbb.com/1/upload?key=${imageKey}`,
+          formData
+        );
+
+        uploadedImageUrl = uploadRes.data.data.url;
+      }
+
       await registerUser(data.email, data.password);
+
       await updateUserProfile({
         displayName: data.name,
-        photoURL: data.photoURL || "https://i.pravatar.cc/150"
+        photoURL: uploadedImageUrl || "https://i.pravatar.cc/150",
       });
 
-      await fetch('http://localhost:3000/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      await fetch("http://localhost:3000/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: data.email,
           name: data.name,
-          photoURL: data.photoURL || "https://i.pravatar.cc/150",
+          photoURL: uploadedImageUrl || "https://i.pravatar.cc/150",
           role: data.role,
-          status: 'pending'
-        })
+          status: "pending",
+        }),
       });
 
       Swal.fire({
         icon: "success",
         title: "Registration Successful!",
-        text: `Welcome ${data.name}! Please login to continue.`,
+        text: `Welcome ${data.name}!`,
+        toast: true,
+        position: "top-right",
+        timer: 2000,
+        timerProgressBar: true,
         showConfirmButton: false,
-        timer: 2000
       });
 
-      navigate("/login");
+      navigate("/");
     } catch (error) {
+      console.error(error);
       Swal.fire({
         icon: "error",
         title: "Registration Failed",
         text: error.message,
-        confirmButtonColor: '#4F46E5'
+        toast: true,
+        position: "top-right",
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: false,
       });
     } finally {
       setIsLoading(false);
     }
   };
 
+  //Google Sign-Up
   const handleGoogleRegister = async () => {
     setIsLoading(true);
     try {
       const result = await signInGoogle();
-      
-      await fetch('http://localhost:3000/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+
+      await fetch("http://localhost:3000/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: result.user.email,
           name: result.user.displayName,
           photoURL: result.user.photoURL,
-          role: 'buyer',
-          status: 'pending'
-        })
+          role: "buyer",
+          status: "pending",
+        }),
       });
 
       Swal.fire({
         icon: "success",
         title: "Welcome!",
+        text: `Hello ${result.user.displayName}`,
+        toast: true,
+        position: "top-right",
+        timer: 2000,
+        timerProgressBar: true,
         showConfirmButton: false,
-        timer: 1500
       });
-      
+
       navigate("/");
-    } catch (error) {
+    } catch (err) {
       Swal.fire({
         icon: "error",
         title: "Registration Failed",
-        text: error.message,
-        confirmButtonColor: '#4F46E5'
+        text: err.message,
+        toast: true,
+        position: "top-right",
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: false,
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-    const currentYear = new Date().getFullYear();
+  const currentYear = new Date().getFullYear();
 
   return (
     <div className="min-h-screen bg-gray-500 flex items-center justify-center py-12 px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full"
-      >
-        {/* Logo */}
+      <div className="max-w-md w-full">
         <div className="text-center mb-5">
-        <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", duration: 0.5 }}
-            className="inline-flex items-center justify-center mb-4">
-            <Logo></Logo>
-        </motion.div>
-        <h1 className="text-4xl font-bold text-white mt-2">Create Account</h1>
-        <p className="text-white">Join us to get started</p>
+          <Logo />
+          <h1 className="text-4xl font-bold text-white mt-2">Create Account</h1>
+          <p className="text-white">Join us to get started</p>
         </div>
 
-        {/* Register Card */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white rounded-2xl shadow-2xl p-8"
-        >
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <div className="bg-white rounded-2xl shadow-2xl p-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
             {/* Name */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Full Name
-              </label>
+              <label className="block font-semibold">Name</label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
-                  {...register("name", { required: "Name is required" })}
-                  className={`w-full pl-11 pr-4 py-3 border-2 ${
-                    errors.name ? 'border-red-500' : 'border-gray-200'
-                  } rounded-xl focus:border-indigo-600 focus:outline-none transition-colors`}
+                  {...register("name", { required: true })}
+                  className="w-full pl-11 py-3 border rounded-xl"
                   placeholder="Enter Your Name"
                 />
               </div>
-              {errors.name && (
-                <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
-                  <XCircle size={16} />
-                  {errors.name.message}
-                </p>
-              )}
+              {errors.name && <p className="text-red-500">Name is required.</p>}
             </div>
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Email Address
-              </label>
+              <label className="block font-semibold">Email</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="email"
-                  {...register("email", { 
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Invalid email address"
-                    }
-                  })}
-                  className={`w-full pl-11 pr-4 py-3 border-2 ${
-                    errors.email ? 'border-red-500' : 'border-gray-200'
-                  } rounded-xl focus:border-indigo-600 focus:outline-none transition-colors`}
-                  placeholder="your@email.com"
+                  {...register("email", { required:true })}
+                  className="w-full pl-11 py-3 border rounded-xl"
+                  placeholder="Your Email"
                 />
               </div>
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
-                  <XCircle size={16} />
-                  {errors.email.message}
-                </p>
-              )}
+              {errors.email && <p className="text-red-500">Email is required.</p>}
             </div>
 
-            {/* Photo URL */}
+            {/* Photo Upload */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Photo URL (Optional)
-              </label>
+              <label className="block font-semibold">Photo</label>
               <div className="relative">
-                <Image className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <Image className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
-                  type="url"
-                  {...register("photoURL")}
-                  className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-600 focus:outline-none transition-colors"
-                  placeholder="https://example.com/photo.jpg"
+                  type="file"
+                  {...register("photo", { required: true })}
+                  className="w-full pl-11 py-3 border rounded-xl"
                 />
               </div>
+              {errors.photo && <p className="text-red-500">Photo is required.</p>}
             </div>
 
             {/* Role */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Role
-              </label>
+              <label className="block font-semibold">Role</label>
               <select
                 {...register("role", { required: true })}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-600 focus:outline-none transition-colors"
+                className="w-full py-3 border rounded-xl"
               >
                 <option value="buyer">Buyer</option>
                 <option value="manager">Manager</option>
               </select>
-              <p className="mt-1 text-xs text-gray-500">
-                Status will be set to "pending" by default
-              </p>
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Password
-              </label>
+              <label className="block font-semibold">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   {...register("password", {
-                    required: "Password is required",
-                    minLength: { value: 6, message: "Password must be at least 6 characters" },
+                    required: true,
+                    minLength: { value: 6, message: "Minimum 6 characters" },
                     pattern: {
                       value: /^(?=.*[a-z])(?=.*[A-Z]).*$/,
-                      message: "Must include uppercase and lowercase letters"
-                    }
+                      message: "Must include uppercase & lowercase",
+                    },
                   })}
-                  className={`w-full pl-11 pr-12 py-3 border-2 ${
-                    errors.password ? 'border-red-500' : 'border-gray-200'
-                  } rounded-xl focus:border-indigo-600 focus:outline-none transition-colors`}
+                  className="w-full pl-11 pr-12 py-3 border rounded-xl"
                   placeholder="Create password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
                 >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showPassword ? <EyeOff /> : <Eye />}
                 </button>
               </div>
-              {/* Password Strength Indicators */}
-              <div className="mt-2 space-y-1">
-                <div className="flex items-center gap-2 text-xs">
-                  {passwordStrength.hasUpperCase ? (
-                    <CheckCircle size={14} className="text-green-500" />
-                  ) : (
-                    <XCircle size={14} className="text-gray-300" />
-                  )}
-                  <span className={passwordStrength.hasUpperCase ? 'text-green-600' : 'text-gray-500'}>
-                    At least one uppercase letter
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  {passwordStrength.hasLowerCase ? (
-                    <CheckCircle size={14} className="text-green-500" />
-                  ) : (
-                    <XCircle size={14} className="text-gray-300" />
-                  )}
-                  <span className={passwordStrength.hasLowerCase ? 'text-green-600' : 'text-gray-500'}>
-                    At least one lowercase letter
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  {passwordStrength.hasMinLength ? (
-                    <CheckCircle size={14} className="text-green-500" />
-                  ) : (
-                    <XCircle size={14} className="text-gray-300" />
-                  )}
-                  <span className={passwordStrength.hasMinLength ? 'text-green-600' : 'text-gray-500'}>
-                    At least 6 characters
-                  </span>
-                </div>
-              </div>
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
-                  <XCircle size={16} />
-                  {errors.password.message}
-                </p>
-              )}
+              <p className={`text-sm mt-1 ${
+                passwordStrength.hasUpperCase &&
+                passwordStrength.hasLowerCase &&
+                passwordStrength.hasMinLength
+                  ? "text-green-600"
+                  : "text-red-500"
+              }`}>
+                Must contain: Uppercase + Lowercase + Minimum 6 characters
+              </p>
             </div>
-
-            {/* Register Btn */}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-bold"
             >
-              {isLoading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Creating Account...
-                </span>
-              ) : (
-                "Create Account"
-              )}
-            </motion.button>
+              {isLoading ? "Creating Account..." : "Create Account"}
+            </button>
           </form>
-
-          {/* Divider */}
-          <div className="flex items-center gap-4 my-6">
+          
+          <div className="flex items-center gap-4 my-5">
             <div className="flex-1 h-px bg-gray-200"></div>
-            <span className="text-sm text-gray-500 font-semibold">OR</span>
+            <span className="text-sm text-gray-500">OR</span>
             <div className="flex-1 h-px bg-gray-200"></div>
           </div>
+          {/* Google Sign Up */}
+          <button
+            onClick={handleGoogleRegister}
+            className="w-full flex items-center justify-center gap-3 py-3 border rounded-xl"
+          >
+            <FcGoogle size={20} /> Sign up with Google
+          </button>
 
-          {/* Social Signup */}
-          <div className="space-y-3">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleGoogleRegister}
-              disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-200 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 transition-all disabled:opacity-50"
-            >
-              <Chrome size={20} className="text-red-500" />
-              Sign up with Google
-            </motion.button>
-          </div>
-
-          {/* Login Link */}
           <p className="text-center mt-6 text-gray-600">
-            Already have an account?{' '}
-            <Link to="/login" className="text-indigo-600 font-bold hover:text-indigo-700">
+            Already have an account?{" "}
+            <Link to="/login" className="text-indigo-600 font-bold">
               Login Here
             </Link>
           </p>
-        </motion.div>
-        <p className="text-center mt-6 text-white/80 text-sm">
-          © {currentYear} Garment<span className="text-yellow-400">Track</span>. All rights reserved.
+        </div>
+
+        <p className="text-center mt-6 text-white text-sm">
+          © {currentYear} GarmentTrack
         </p>
-      </motion.div>
+      </div>
     </div>
   );
 };
