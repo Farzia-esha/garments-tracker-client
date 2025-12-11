@@ -15,6 +15,7 @@ import AllOrders from "../pages/Dashboard/Admin/AllOrders";
 import ManageProducts from "../pages/Dashboard/manager/ManageProducts";
 import AddProduct from "../pages/Dashboard/manager/AddProduct";
 import PendingOrders from "../pages/Dashboard/manager/PendingOrders";
+import ApprovedOrders from "../pages/Dashboard/manager/ApprovedOrders";
 
 export const router = createBrowserRouter([
   {
@@ -83,12 +84,12 @@ export const router = createBrowserRouter([
         path: 'all-orders',
         element: <AllOrders />
       },
+
+      //manager
       {
         path: 'add-product',
         element: <AddProduct />
       },
-
-      //manager
       {
         path: 'manage-products',
         element: <ManageProducts />
@@ -97,6 +98,10 @@ export const router = createBrowserRouter([
         path: 'pending-orders',
         element: <PendingOrders />
       },
+      {
+        path:'approved-orders',
+        element: <ApprovedOrders />
+      }
     ]
   }
 ]);
