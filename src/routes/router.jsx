@@ -11,6 +11,9 @@ import BookingForm from "../pages/Booking/BookingForm";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import ManageUsers from "../pages/Dashboard/Admin/ManageUsers";
 import AdminProducts from "../pages/Dashboard/Admin/AdminProducts";
+import AllOrders from "../pages/Dashboard/Admin/AllOrders";
+import ManageProducts from "../pages/Dashboard/manager/ManageProducts";
+import AddProduct from "../pages/Dashboard/manager/AddProduct";
 
 export const router = createBrowserRouter([
   {
@@ -74,7 +77,19 @@ export const router = createBrowserRouter([
       {
         path:'all-products',
         element:<AdminProducts></AdminProducts>
-      }
+      },
+      {
+        path: 'all-orders',
+        element: <AllOrders />
+      },
+            {
+        path: 'add-product',
+        element: <AddProduct />
+      },
+      {
+        path: 'manage-products',
+        element: <ManageProducts />
+      },
     ]
   }
 ]);
