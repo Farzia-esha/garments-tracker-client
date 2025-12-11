@@ -69,12 +69,11 @@ const Login = () => {
             email: result.user.email,
             name: result.user.displayName,
             photoURL: result.user.photoURL,
-            role: 'buyer', // Default role for Google login
-            status: 'pending' // Default status
+            role: 'buyer', 
+            status: 'pending'
           })
         });
       } catch (err) {
-        // User might already exist, that's okay
         console.log('User may already exist:', err);
       }
 

@@ -7,6 +7,7 @@ import Register from "../pages/Auth/Register";
 import ProductDetails from "../pages/Home/ProductDetails";
 import AllProducts from "../pages/Product/AllProducts";
 import PrivateRoute from "../contexts/PrivateRoute";
+import BookingForm from "../pages/Booking/BookingForm";
 
 export const router = createBrowserRouter([
   {
@@ -23,9 +24,18 @@ export const router = createBrowserRouter([
 
         },
         {
-            path:'/product/:id',
-            element:<PrivateRoute><ProductDetails></ProductDetails></PrivateRoute>
+            path:'product/:id',
+            element:<PrivateRoute>
+                      <ProductDetails></ProductDetails>
+                    </PrivateRoute>
+        },
+        {
+            path: "booking/:id",
+            element:<PrivateRoute>
+                      <BookingForm />
+                    </PrivateRoute>
         }
+
     ]
   },
   {

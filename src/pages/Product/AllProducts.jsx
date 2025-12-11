@@ -6,7 +6,7 @@ const AllProducts = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:3000/products") // fetch all products
+    fetch("http://localhost:3000/products")
       .then(res => res.json())
       .then(data => setProducts(data))
       .catch(err => console.log(err));

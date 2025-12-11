@@ -48,7 +48,10 @@ const ProductDetails = () => {
       navigate("/login");
       return;
     }
+
+    navigate(`/booking/${id}`);
   };
+
 
   if (loading) {
     return (
@@ -131,7 +134,7 @@ const ProductDetails = () => {
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}
                 >
-                  <ShoppingCart size={24} /> {canOrder ? "Place Order" : "Cannot Order"}
+                  <ShoppingCart size={24} /> {canOrder ? "Booking/Order" : "Cannot Order"}
                 </button>
               </div>
 
