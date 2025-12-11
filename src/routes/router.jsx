@@ -10,6 +10,7 @@ import PrivateRoute from "../contexts/PrivateRoute";
 import BookingForm from "../pages/Booking/BookingForm";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import ManageUsers from "../pages/Dashboard/Admin/ManageUsers";
+import AdminProducts from "../pages/Dashboard/Admin/AdminProducts";
 
 export const router = createBrowserRouter([
   {
@@ -70,6 +71,10 @@ export const router = createBrowserRouter([
         path: 'manage-users',
         element: <ManageUsers />
       },
+      {
+        path:'all-products',
+        element:<AdminProducts></AdminProducts>
+      }
     ]
   }
 ]);
