@@ -72,7 +72,9 @@ const ProductDetails = () => {
     );
   }
 
-  const canOrder = user && userRole !== "admin" && userRole !== "manager" && userStatus !== "suspended";
+const canOrder = user && 
+                 userRole === 'buyer' && 
+                 userStatus !== 'suspended';
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4">

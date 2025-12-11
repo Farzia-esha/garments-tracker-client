@@ -7,7 +7,6 @@ const BookingForm = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
-
   const [product, setProduct] = useState(null);
   const [qty, setQty] = useState("");
   const [total, setTotal] = useState(0);
@@ -92,8 +91,8 @@ const BookingForm = () => {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex justify-center items-center text-xl">
-        Loading...
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-600"></div>
       </div>
     );
   }

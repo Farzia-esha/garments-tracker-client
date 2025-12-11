@@ -8,6 +8,8 @@ import ProductDetails from "../pages/Home/ProductDetails";
 import AllProducts from "../pages/Product/AllProducts";
 import PrivateRoute from "../contexts/PrivateRoute";
 import BookingForm from "../pages/Booking/BookingForm";
+import DashboardLayout from "../Layouts/DashboardLayout";
+import ManageUsers from "../pages/Dashboard/Admin/ManageUsers";
 
 export const router = createBrowserRouter([
   {
@@ -51,6 +53,23 @@ export const router = createBrowserRouter([
             Component: Register,
 
         }
+    ]
+  },
+  {
+    path: '/dashboard',
+    element: <PrivateRoute><DashboardLayout /></PrivateRoute>,
+    children: [
+      {
+        index: true,
+        element: <div className="text-center py-20">
+          <h2 className="text-3xl font-bold">Welcome to Dashboard</h2>
+          <p className="text-gray-600 mt-4">Select a menu item to get started</p>
+        </div>
+      },
+      {
+        path: 'manage-users',
+        element: <ManageUsers />
+      },
     ]
   }
 ]);
