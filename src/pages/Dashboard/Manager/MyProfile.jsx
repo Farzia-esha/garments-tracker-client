@@ -19,7 +19,7 @@ const MyProfile = () => {
 
   useEffect(() => {
     if (user) {
-      fetch(`http://localhost:3000/users/${user.email}`)
+      fetch(`${import.meta.env.VITE_API_URL}/users/${user.email}`)
         .then(res => {
           if (!res.ok) throw new Error('User not found');
           return res.text();
@@ -37,11 +37,11 @@ const MyProfile = () => {
 
   const fetchManagerStats = async () => {
     try {
-      const productsRes = await fetch('http://localhost:3000/products');
+      const productsRes = await fetch(`${import.meta.env.VITE_API_URL}/products`);
       const allProducts = await productsRes.json();
       const myProducts = allProducts.filter(p => p.createdBy === user.email);
 
-      const ordersRes = await fetch('http://localhost:3000/bookings');
+      const ordersRes = await fetch(`${import.meta.env.VITE_API_URL}/bookings`);
       const allOrders = await ordersRes.json();
 
       const totalProducts = myProducts.length;

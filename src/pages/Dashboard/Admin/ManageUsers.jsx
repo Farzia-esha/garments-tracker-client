@@ -16,7 +16,7 @@ const ManageUsers = () => {
   }, []);
 
   const fetchUsers = () => {
-    fetch('http://localhost:3000/users')
+    fetch(`${import.meta.env.VITE_API_URL}/users`)
       .then(res => res.json())
       .then(data => {
         setUsers(data);
@@ -48,7 +48,7 @@ const ManageUsers = () => {
     if (!selectedUser) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/users/${selectedUser.email}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${selectedUser.email}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -82,7 +82,6 @@ const ManageUsers = () => {
   const handleSuspend = async () => {
     if (!selectedUser) return;
 
-    // Validation
     if (!suspendReason.trim()) {
       Swal.fire({
         icon: 'warning',
@@ -102,7 +101,7 @@ const ManageUsers = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/users/${selectedUser.email}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${selectedUser.email}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

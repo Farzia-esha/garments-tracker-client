@@ -19,6 +19,7 @@ import ApprovedOrders from "../pages/Dashboard/manager/ApprovedOrders";
 import MyProfile from "../pages/Dashboard/Manager/MyProfile";
 import MyOrders from "../pages/Dashboard/buyer/MyOrders";
 import AboutUs from "../Components/Shared/AboutUs";
+import ContactUs from "../Components/Shared/ContactUs";
 
 export const router = createBrowserRouter([
   {
@@ -32,6 +33,11 @@ export const router = createBrowserRouter([
         {
           path:'about',
           Component:AboutUs
+        },
+        {
+          path:'contact',
+          Component: ContactUs,
+          loader:()=>fetch('/public/serviceCenters.json').then(res=>res.json())
         },
         {
           path:'all-products',

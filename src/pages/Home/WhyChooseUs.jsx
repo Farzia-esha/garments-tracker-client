@@ -22,12 +22,12 @@ const WhyChooseUs = () => {
   }, []);
 
   return (
-    <section className="py-16 bg-gray-200 relative overflow-hidden px-10">
+    <section className="py-10 bg-gray-200 relative overflow-hidden px-10">
       <div className="absolute -top-20 -left-20 w-60 h-60 bg-indigo-200 rounded-full opacity-20 blur-3xl"></div>
       <div className="absolute -bottom-20 -right-20 w-72 h-72 bg-purple-200 rounded-full opacity-20 blur-3xl"></div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <h2 className="text-4xl md:text-5xl font-bold text-center mb-12">
+        <h2 className="text-4xl md:text-5xl font-bold text-center mb-8">
           Why <span className="text-indigo-600">Choose Us?</span>
         </h2>
         <p className="text-center text-gray-600 max-w-2xl mx-auto mb-10">
@@ -46,7 +46,7 @@ const WhyChooseUs = () => {
                   <IconComponent size={32} />
                 </div>
 
-                <h3 className="text-xl md:text-2xl font-semibold mb-3 group-hover:text-indigo-600 transition-colors">
+                <h3 className="text-xl md:text-2xl font-semibold mb-3 group-hover:text-indigo-600 transition-colors ">
                   {feature.title}
                 </h3>
                 <p className="text-gray-600 leading-relaxed">{feature.description}</p>

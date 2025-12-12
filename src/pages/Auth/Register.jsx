@@ -48,7 +48,7 @@ const Register = () => {
         photoURL: uploadedImageUrl || "https://i.pravatar.cc/150",
       });
 
-      await fetch("http://localhost:3000/users", {
+      await fetch(`${import.meta.env.VITE_API_URL}/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -95,7 +95,7 @@ const Register = () => {
     try {
       const result = await signInGoogle();
 
-      await fetch("http://localhost:3000/users", {
+      await fetch(`${import.meta.env.VITE_API_URL}/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

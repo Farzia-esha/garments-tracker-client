@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
-import { ShoppingBag, Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
+import { ShoppingBag, Facebook, Instagram, Linkedin, Mail, Phone, MapPin, TwitterIcon } from 'lucide-react';
 import Logo from '../Logo/Logo';
+import { FaXTwitter } from 'react-icons/fa6';
 
 
 const Footer = () => {
@@ -32,7 +33,7 @@ const Footer = () => {
                 <Facebook className="w-5 h-5" />
               </a>
               <a href="https://x.com" className="w-9 h-9 bg-gray-800 flex items-center justify-center rounded-full hover:bg-blue-400 transition">
-                <Twitter className="w-5 h-5" />
+                <FaXTwitter className="w-5 h-5" />
               </a>
               <a href="https://www.instagram.com" className="w-9 h-9 bg-gray-800 flex items-center justify-center rounded-full hover:bg-pink-600 transition">
                 <Instagram className="w-5 h-5" />

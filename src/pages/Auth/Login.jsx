@@ -59,7 +59,6 @@ const Login = () => {
     try {
       const result = await signInGoogle();
 
-      // Save to backend (role: buyer, status: pending as per requirements)
       try {
         await fetch(`${import.meta.env.VITE_API_URL}/users`, {
           method: 'POST',

@@ -5,7 +5,7 @@ const ProductsSection = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:3000/products/home")
+    fetch(`${import.meta.env.VITE_API_URL}/products/home`)
       .then(res => res.json())
       .then(data => setProducts(data))
       .catch(err => console.log(err));

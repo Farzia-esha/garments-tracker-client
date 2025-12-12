@@ -14,7 +14,7 @@ const PendingOrders = () => {
 
   const fetchPendingOrders = async () => {
     try {
-      const res = await fetch("http://localhost:3000/orders?status=pending");
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/orders?status=pending`);
       const data = await res.json();
       setOrders(data);
       setLoading(false);
@@ -37,7 +37,7 @@ const PendingOrders = () => {
     if (!result.isConfirmed) return;
 
     try {
-      const res = await fetch(`http://localhost:3000/orders/approve/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/orders/approve/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
       });
@@ -64,7 +64,7 @@ const PendingOrders = () => {
     if (!result.isConfirmed) return;
 
     try {
-      const res = await fetch(`http://localhost:3000/orders/reject/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
       });

@@ -22,7 +22,7 @@ const ManageProducts = () => {
   }, [products, searchTerm]);
 
   const fetchProducts = () => {
-    fetch('http://localhost:3000/products')
+    fetch(`${import.meta.env.VITE_API_URL}/products`)
       .then(res => res.json())
       .then(data => {
         const myProducts = data.filter(p => p.createdBy === user.email);
@@ -61,7 +61,7 @@ const ManageProducts = () => {
 
     if (result.isConfirmed) {
       try {
-        const response = await fetch(`http://localhost:3000/products/${productId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/${productId}`, {
           method: 'DELETE'
         });
 

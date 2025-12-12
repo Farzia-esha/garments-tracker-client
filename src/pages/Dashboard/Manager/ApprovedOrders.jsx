@@ -30,13 +30,13 @@ const ApprovedOrders = () => {
   }, []);
 
   const fetchApprovedOrders = async () => {
-    const res = await fetch("http://localhost:3000/orders/approved");
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/orders/approved`);
     const data = await res.json();
     setOrders(data);
   };
 
   const fetchTracking = async (orderId) => {
-    const res = await fetch(`http://localhost:3000/tracking/${orderId}`);
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/tracking/${orderId}`);
     const data = await res.json();
     setTrackingList(data);
   };
@@ -52,7 +52,7 @@ const ApprovedOrders = () => {
       orderId: selectedOrder._id,
     };
 
-    const res = await fetch("http://localhost:3000/tracking", {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newEntry),

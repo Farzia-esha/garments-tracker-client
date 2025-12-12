@@ -15,7 +15,7 @@ const MyOrders = () => {
 
   useEffect(() => {
     if (user) {
-      fetch(`http://localhost:3000/bookings/${user.email}`)
+      fetch(`${import.meta.env.VITE_API_URL}/bookings/${user.email}`)
         .then(res => res.json())
         .then(data => {
           setOrders(data);
@@ -41,7 +41,7 @@ const MyOrders = () => {
 
     if (result.isConfirmed) {
       try {
-        const response = await fetch(`http://localhost:3000/bookings/${orderId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings/${orderId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -58,7 +58,7 @@ const MyOrders = () => {
             timer: 2000,
             showConfirmButton: false
           });
-          const res = await fetch(`http://localhost:3000/bookings/${user.email}`);
+          const res = await fetch(`${import.meta.env.VITE_API_URL}/bookings/${user.email}`);
           const data = await res.json();
           setOrders(data);
         }
