@@ -18,6 +18,7 @@ import PendingOrders from "../pages/Dashboard/manager/PendingOrders";
 import ApprovedOrders from "../pages/Dashboard/manager/ApprovedOrders";
 import MyProfile from "../pages/Dashboard/Manager/MyProfile";
 import MyOrders from "../pages/Dashboard/buyer/MyOrders";
+import AboutUs from "../Components/Shared/AboutUs";
 
 export const router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ export const router = createBrowserRouter([
         {
             index:true,
             Component:Home
+        },
+        {
+          path:'about',
+          Component:AboutUs
         },
         {
           path:'all-products',
