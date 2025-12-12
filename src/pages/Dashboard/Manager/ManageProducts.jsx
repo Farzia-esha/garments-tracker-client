@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {Trash2, Eye, Search } from 'lucide-react';
 import Swal from 'sweetalert2';
 import useAuth from '../../../hooks/useAuth';
+import Loading from '../../../Components/Shared/Loading';
 
 const ManageProducts = () => {
   const { user } = useAuth();
@@ -98,10 +99,7 @@ const ManageProducts = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-600"></div>
-      </div>
+    return ( <div><Loading></Loading></div>
     );
   }
 

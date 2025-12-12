@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { CheckCircle, XCircle, Eye, Calendar } from "lucide-react";
 import Swal from "sweetalert2";
+import Loading from "../../../Components/Shared/Loading";
 
 const PendingOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -77,13 +78,7 @@ const PendingOrders = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin h-16 w-16 rounded-full border-4 border-indigo-600 border-t-transparent"></div>
-      </div>
-    );
-  }
+  if (loading) { return ( <div><Loading></Loading></div>); }
 
   return (
     <div>

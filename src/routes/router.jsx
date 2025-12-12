@@ -16,6 +16,7 @@ import ManageProducts from "../pages/Dashboard/manager/ManageProducts";
 import AddProduct from "../pages/Dashboard/manager/AddProduct";
 import PendingOrders from "../pages/Dashboard/manager/PendingOrders";
 import ApprovedOrders from "../pages/Dashboard/manager/ApprovedOrders";
+import MyProfile from "../pages/Dashboard/Manager/MyProfile";
 
 export const router = createBrowserRouter([
   {
@@ -72,6 +73,8 @@ export const router = createBrowserRouter([
           <p className="text-gray-600 mt-4">Select a menu item to get started</p>
         </div>
       },
+
+      //admin
       {
         path: 'manage-users',
         element: <ManageUsers />
@@ -101,6 +104,10 @@ export const router = createBrowserRouter([
       {
         path:'approved-orders',
         element: <ApprovedOrders />
+      },
+      {
+        path:'profile',
+        element:<MyProfile/>
       }
     ]
   }
