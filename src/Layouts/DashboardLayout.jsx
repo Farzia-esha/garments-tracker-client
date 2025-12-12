@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router';
-import { Menu, X, Home, Package, ShoppingCart, Users, Settings, LogOut, LayoutDashboard, Plus, CheckCircle, Clock } from 'lucide-react';
+import { Menu, X, Home, Package, ShoppingCart, Users, LogOut, LayoutDashboard, Plus, CheckCircle, Clock } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import useUserRole from '../hooks/useUserRole';
 import Logo from '../Components/Logo/Logo';
+import Loading from '../Components/Shared/Loading';
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -41,13 +42,7 @@ const DashboardLayout = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-600"></div>
-      </div>
-    );
-  }
+  if (loading) { return ( <div><Loading /></div> ); }
 
   const menuItems = getMenuItems();
 
