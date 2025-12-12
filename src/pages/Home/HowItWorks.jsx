@@ -14,13 +14,13 @@ const HowItWorks = () => {
   const [steps, setSteps] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:3000/how-it-works")
+    axios.get(`${import.meta.env.VITE_API_URL}/how-it-works`)
       .then(res => setSteps(res.data))
       .catch(err => console.log(err));
   }, []);
 
   return (
-    <section className="py-20 bg-blue-100">
+    <section className="py-20 px-10 bg-blue-100">
       <div className="container mx-auto px-4">
         
         <motion.div

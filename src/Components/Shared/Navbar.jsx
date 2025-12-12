@@ -13,7 +13,7 @@ const Navbar = () => {
   // Before Login Links
   const beforeLoginLinks = [
     { name: 'Home', path: '/', icon: <Home size={18} /> },
-    { name: 'All Products', path: '/all-products', icon: <Package size={18} /> },
+    { name: 'All Product', path: '/all-products', icon: <Package size={18} /> },
     { name: 'About Us', path: '/about', icon: <Info size={18} /> },
     { name: 'Contact', path: '/contact', icon: <Mail size={18} /> }
   ];
@@ -21,7 +21,7 @@ const Navbar = () => {
   // After Login Links
   const afterLoginLinks = [
     { name: 'Home', path: '/', icon: <Home size={18} /> },
-    { name: 'All Products', path: '/all-products', icon: <Package size={18} /> },
+    { name: 'All Product', path: '/all-products', icon: <Package size={18} /> },
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} /> }
   ];
 

@@ -1,14 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ChevronLeft, ChevronRight, Star, Shield, CheckCircle, TrendingUp } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Star} from 'lucide-react';
 
 const Banner = () => {
   const [banners, setBanners] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
-    fetch('http://localhost:3000/banners')
+    fetch(`${import.meta.env.VITE_API_URL}/banners`)
       .then(res => res.json())
       .then(data => setBanners(data))
       .catch(err => console.error(err));
@@ -69,9 +69,6 @@ const Banner = () => {
               <div className="flex flex-col sm:flex-row gap-4 mb-12">
                 <a href={currentBanner.primaryLink} className="px-8 py-4 bg-yellow-400 rounded-xl font-bold text-lg flex items-center gap-2">
                   {currentBanner.primaryCTA} <ArrowRight size={20} />
-                </a>
-                <a href={currentBanner.secondaryLink} className="px-8 py-4 bg-white/10 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-2 border-2 border-white/50 hover:bg-white hover:text-gray-900 transition-all duration-300">
-                  {currentBanner.secondaryCTA}
                 </a>
               </div>
             </motion.div>

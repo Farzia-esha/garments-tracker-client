@@ -11,7 +11,7 @@ const useUserRole = () => {
   useEffect(() => {
     if (user?.email) {
       setLoading(true);
-      fetch(`http://localhost:3000/users/${user.email}`)
+      fetch(`${import.meta.env.VITE_API_URL}/${user.email}`)
         .then(res => {
           if (!res.ok) {
             throw new Error('User not found');
