@@ -2,54 +2,47 @@ import { useEffect, useState } from 'react';
 import useAuth from './useAuth';
 
 const useUserRole = () => {
-  const { user } = useAuth();
-  const [userRole, setUserRole] = useState(null);
-  const [userStatus, setUserStatus] = useState(null);
+  const { user, loading: authLoading } = useAuth();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user?.email) {
+    if (user?.email && !authLoading) {
       setLoading(true);
-      fetch(`${import.meta.env.VITE_API_URL}/${user.email}`)
+      fetch(`${import.meta.env.VITE_API_URL}/users/${user.email}`)
         .then(res => {
-          if (!res.ok) {
-            throw new Error('User not found');
-          }
-          return res.text();
+          if (!res.ok) throw new Error('User not found');
+          return res.json();
         })
-        .then(text => {
-          if (!text) {
-            console.log('User not found in database');
-            setUserRole(null);
-            setUserStatus(null);
-            setUserData(null);
-            setLoading(false);
-            return;
-          }
-          const data = JSON.parse(text);
-          setUserRole(data?.role);
-          setUserStatus(data?.status);
+        .then(data => {
           setUserData(data);
           setLoading(false);
         })
         .catch(err => {
-          console.error('Error fetching user role:', err);
-          setUserRole(null);
-          setUserStatus(null);
+          console.error('Error fetching user:', err);
           setUserData(null);
           setLoading(false);
         });
-    } else {
-      setUserRole(null);
-      setUserStatus(null);
+    } else if (!authLoading && !user) {
       setUserData(null);
       setLoading(false);
     }
-  }, [user]);
+  }, [user, authLoading]);
 
-  return { userRole, userStatus, userData, loading };
+  return {
+    userData,
+    loading,
+    userRole: userData?.role || null,
+    userStatus: userData?.status || null,
+    role: userData?.role || null,
+    status: userData?.status || null,
+    isAdmin: userData?.role === 'admin',
+    isManager: userData?.role === 'manager',
+    isBuyer: userData?.role === 'buyer',
+    isSuspended: userData?.status === 'suspended',
+    isApproved: userData?.status === 'approved',
+    isPending: userData?.status === 'pending'
+  };
 };
 
 export default useUserRole;
-

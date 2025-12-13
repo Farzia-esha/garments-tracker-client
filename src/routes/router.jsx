@@ -20,6 +20,7 @@ import MyProfile from "../pages/Dashboard/Manager/MyProfile";
 import MyOrders from "../pages/Dashboard/buyer/MyOrders";
 import AboutUs from "../Components/Shared/AboutUs";
 import ContactUs from "../Components/Shared/ContactUs";
+// import TrackOrder from "../pages/Dashboard/buyer/TrackOrder";
 
 export const router = createBrowserRouter([
   {
@@ -37,7 +38,7 @@ export const router = createBrowserRouter([
         {
           path:'contact',
           Component: ContactUs,
-          loader:()=>fetch('/public/serviceCenters.json').then(res=>res.json())
+          loader:()=>fetch('/serviceCenters.json').then(res=>res.json())
         },
         {
           path:'all-products',
@@ -55,7 +56,8 @@ export const router = createBrowserRouter([
             element:<PrivateRoute>
                       <BookingForm />
                     </PrivateRoute>
-        }
+        },
+        
 
     ]
   },
@@ -127,6 +129,11 @@ export const router = createBrowserRouter([
         path:'my-orders',
         element: <MyOrders />
       },
+      // {
+      //   path:'track-order/:orderId',
+      //   element:<TrackOrder />
+
+      // }
 
     ]
   }

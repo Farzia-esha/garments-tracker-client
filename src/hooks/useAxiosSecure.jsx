@@ -1,40 +1,50 @@
 import axios from 'axios';
-import { useNavigate } from 'react-router';
+import React, { useEffect } from 'react';
 import useAuth from './useAuth';
+import { useNavigate } from 'react-router';
 
 const axiosSecure = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  withCredentials: true
+    baseURL: import.meta.env.VITE_API_URL,
+    withCredentials: true,
 });
 
 const useAxiosSecure = () => {
-  const navigate = useNavigate();
-  const { logOut } = useAuth();
+    const { user, logOut } = useAuth();
+    const navigate = useNavigate();
 
-  axiosSecure.interceptors.request.use(
-    config => {
-      return config;
-    },
-    error => {
-      return Promise.reject(error);
-    }
-  );
+    useEffect(() => {
+        // intercept request
+        const reqInterceptor = axiosSecure.interceptors.request.use(config => {
+            config.headers.Authorization = `Bearer ${user?.accessToken}`
+            return config
+        })
 
-  axiosSecure.interceptors.response.use(
-    response => {
-      return response;
-    },
-    async error => {
-      const status = error.response?.status;
-      if (status === 401 || status === 403) {
-        await logOut();
-        navigate('/login');
-      }
-      return Promise.reject(error);
-    }
-  );
+        // interceptor response
+        const resInterceptor = axiosSecure.interceptors.response.use((response) => {
+            return response;
+        }, (error) => {
+            console.log(error);
 
-  return axiosSecure;
+            const statusCode = error.status;
+            if (statusCode === 401 || statusCode === 403) {
+                logOut()
+                    .then(() => {
+                        navigate('/login')
+                    })
+            }
+
+
+            return Promise.reject(error);
+        })
+
+        return () => {
+            axiosSecure.interceptors.request.eject(reqInterceptor);
+            axiosSecure.interceptors.response.eject(resInterceptor);
+        }
+
+    }, [user, logOut, navigate])
+
+    return axiosSecure;
 };
 
 export default useAxiosSecure;

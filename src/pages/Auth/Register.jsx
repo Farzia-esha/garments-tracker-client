@@ -182,14 +182,11 @@ const Register = () => {
             {/* Photo Upload */}
             <div>
               <label className="block font-semibold">Photo</label>
-              <div className="relative">
-                <Image className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="file"
                   {...register("photo", { required: true })}
-                  className="w-full pl-11 py-3 border rounded-xl"
+                  className="w-full border rounded-xl file-input"
                 />
-              </div>
               {errors.photo && <p className="text-red-500">Photo is required.</p>}
             </div>
 

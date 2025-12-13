@@ -7,6 +7,7 @@ const BookingForm = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+
   const [product, setProduct] = useState(null);
   const [qty, setQty] = useState("");
   const [total, setTotal] = useState(0);
@@ -59,7 +60,6 @@ const BookingForm = () => {
       createdAt: new Date(),
     };
 
- 
     if (product.paymentMode === "Cash On Delivery") {
       await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
         method: "POST",
@@ -91,8 +91,8 @@ const BookingForm = () => {
 
   if (!product) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-600"></div>
+      <div className="min-h-screen flex justify-center items-center text-xl">
+        Loading...
       </div>
     );
   }
@@ -185,7 +185,7 @@ const BookingForm = () => {
           <textarea name="notes" className="textarea textarea-bordered w-full"></textarea>
         </div>
 
-        <button className="btn bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl text-white w-full py-3 text-lg">Submit Order</button>
+        <button className="btn btn-primary w-full py-3 text-lg">Submit Order</button>
 
       </form>
     </div>
