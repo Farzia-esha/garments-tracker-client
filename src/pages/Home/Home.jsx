@@ -4,6 +4,7 @@ import HowItWorks from './HowItWorks';
 import Testimonial from './testimonial';
 import ProductsSection from './ProductsSection';
 import WhyChooseUs from './WhyChooseUs';
+import StatsSection from '../../Components/Shared/StatsSection';
 
 const Home = () => {
     return (
@@ -12,6 +13,7 @@ const Home = () => {
             <ProductsSection></ProductsSection>
             <WhyChooseUs></WhyChooseUs>
             <HowItWorks></HowItWorks>
+            <StatsSection></StatsSection>
             <Testimonial></Testimonial>
             
         </div>

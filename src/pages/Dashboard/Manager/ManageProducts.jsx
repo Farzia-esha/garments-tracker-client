@@ -119,7 +119,7 @@ const ManageProducts = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total Quantity</p>
-              <p className="text-3xl font-bold text-green-600">
+              <p className="text-3xl font-bold">
                 {products.reduce((sum, p) => sum + p.quantity, 0)}
               </p>
             </div>
@@ -129,7 +129,7 @@ const ManageProducts = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total Value</p>
-              <p className="text-3xl font-bold text-purple-600">
+              <p className="text-3xl font-semibold ">
                 BDT {products.reduce((sum, p) => sum + (p.price * p.quantity), 0)}
               </p>
             </div>
@@ -153,7 +153,7 @@ const ManageProducts = () => {
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50">
+            <thead className="bg-blue-100">
               <tr>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Image</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Name</th>
@@ -181,10 +181,10 @@ const ManageProducts = () => {
                       />
                     </td>
                     <td className="px-6 py-4">
-                      <span className="font-medium text-gray-800">{product.name}</span>
+                      <span className="font-medium">{product.name}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="font-semibold text-indigo-600">BDT {product.price}</span>
+                      <span className="font-semibold">BDT {product.price}</span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${getCategoryBadge(product.category)}`}>
