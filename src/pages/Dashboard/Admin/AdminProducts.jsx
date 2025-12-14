@@ -1,108 +1,162 @@
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router";
-import Swal from "sweetalert2";
-import useAxiosSecure from "../../../hooks/useAxiosSecure";
+import React, { useEffect, useState } from 'react';
+import Swal from 'sweetalert2';
+import { Eye, EyeOff, Trash2 } from 'lucide-react';
+import Loading from '../../../Components/Shared/Loading';
 
 const AdminProducts = () => {
-  const axiosSecure = useAxiosSecure();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const { data: products = [], refetch } = useQuery({
-    queryKey: ["all-products"],
-    queryFn: async () => {
-      const res = await axiosSecure.get("/products");
-      return res.data;
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/products`);
+      const data = await res.json();
+      setProducts(data);
+    } catch (err) {
+      console.error(err);
+      Swal.fire('Error', 'Failed to fetch products', 'error');
+    } finally {
+      setLoading(false);
     }
-  });
+  };
 
-  const handleDelete = async (id) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "This action cannot be undone!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#e63946",
-      cancelButtonColor: "#457b9d",
-      confirmButtonText: "Yes, delete it!"
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        await axiosSecure.delete(`/products/${id}`);
-        Swal.fire("Deleted!", "Product has been removed.", "success");
-        refetch();
+  const toggleShowOnHome = async (productId, currentStatus) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/products/home/${productId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ showOnHome: !currentStatus })
+      });
+
+      if (response.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated!',
+          text: `Product ${!currentStatus ? 'added to' : 'removed from'} home page`,
+          showConfirmButton: false,
+          timer: 1500
+        });
+        fetchProducts();
       }
-    });
+    } catch (error) {
+      Swal.fire('Error', 'Failed to update', 'error');
+    }
   };
 
-  const handleHomeToggle = async (id, value) => {
-    await axiosSecure.patch(`/products/home/${id}`, { showOnHome: value });
-    refetch();
+  const handleDelete = async (productId, productName) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: `Delete "${productName}"? This action cannot be undone!`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/products/${productId}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          Swal.fire('Deleted!', 'Product has been deleted.', 'success');
+          fetchProducts();
+        }
+      } catch (error) {
+        Swal.fire('Error', 'Failed to delete product', 'error');
+      }
+    }
   };
+
+  if (loading) { return (<div><Loading/> </div> );}
 
   return (
-    <div className="p-6">
-      <h2 className="text-3xl font-semibold mb-6">All Products</h2>
+    <div className="bg-white rounded-xl shadow-lg p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">All Products</h1>
+        <div className="text-sm text-gray-600">
+          Total: <span className="font-bold text-indigo-600">{products.length}</span> products
+        </div>
+      </div>
 
-      <div className="overflow-x-auto shadow-xl border rounded-xl">
-        <table className="table w-full">
-          <thead className="bg-gray-100 text-gray-600 uppercase text-sm">
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-blue-100">
             <tr>
-              <th>Image</th>
-              <th>Product</th>
-              <th>Price</th>
-              <th>Category</th>
-              <th>Created By</th>
-              <th>Show on Home</th>
-              <th>Actions</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Image</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Price</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Category</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Created By</th>
+              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">Show on Home</th>
+              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">Actions</th>
             </tr>
           </thead>
-
-          <tbody>
-            {products.map((product) => (
-              <tr key={product._id} className="hover">
-                <td>
-                  <img
-                    src={product?.image}
-                    className="w-16 h-16 object-cover rounded-md"
-                    alt=""
+          <tbody className="divide-y divide-gray-200">
+            {products.map(product => (
+              <tr key={product._id} className="hover:bg-gray-50 transition">
+                <td className="px-4 py-3">
+                  <img 
+                    src={product.image} 
+                    alt={product.name} 
+                    className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200" 
                   />
                 </td>
-
-                <td className="font-semibold">{product.name}</td>
-                <td className="text-blue-600 font-bold">${product.price}</td>
-                <td>{product.category}</td>
-                <td>{product.createdBy}</td>
-
-                {/* Show on Home Toggle */}
-                <td>
-                  <input
-                    type="checkbox"
-                    className="toggle toggle-primary"
-                    checked={product.showOnHome || false}
-                    onChange={(e) =>
-                      handleHomeToggle(product._id, e.target.checked)
-                    }
-                  />
+                <td className="px-4 py-3">
+                  <p className="font-semibold text-gray-800">{product.name}</p>
+                  <p className="text-xs text-gray-500">Stock: {product.quantity} pcs</p>
                 </td>
-
-                {/* Edit + Delete */}
-                <td className="space-x-2">
-                  <Link
-                    to={`/dashboard/edit-product/${product._id}`}
-                    className="btn btn-sm btn-info"
-                  >
-                    Edit
-                  </Link>
-
+                <td className="px-4 py-3">
+                  <span className="text-indigo-600 font-bold">BDT {product.price}</span>
+                </td>
+                <td className="px-4 py-3">
+                  <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
+                    {product.category}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-600">
+                  {product.createdBy || 'N/A'}
+                </td>
+                <td className="px-4 py-3 text-center">
                   <button
-                    onClick={() => handleDelete(product._id)}
-                    className="btn btn-sm btn-error"
+                    onClick={() => toggleShowOnHome(product._id, product.showOnHome)}
+                    className={`p-2 rounded-lg transition ${
+                      product.showOnHome 
+                        ? 'bg-green-100 text-green-600 hover:bg-green-200' 
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                    title={product.showOnHome ? 'Remove from home' : 'Show on home'}
                   >
-                    Delete
+                    {product.showOnHome ? <Eye size={20} /> : <EyeOff size={20} />}
                   </button>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex justify-center gap-2">
+                    <button
+                      onClick={() => handleDelete(product._id, product.name)}
+                      className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition"
+                      title="Delete product"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+
+        {products.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No products found</p>
+          </div>
+        )}
       </div>
     </div>
   );

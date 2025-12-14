@@ -1,370 +1,246 @@
 import React, { useEffect, useState } from 'react';
-import { Users, Edit, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { UserCheck, UserX, Search, Edit } from 'lucide-react';
 
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState(''); 
-  const [suspendReason, setSuspendReason] = useState('');
-  const [suspendFeedback, setSuspendFeedback] = useState('');
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  const fetchUsers = () => {
-    fetch(`${import.meta.env.VITE_API_URL}/users`)
-      .then(res => res.json())
-      .then(data => {
-        setUsers(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
-      });
-  };
+  useEffect(() => {
+    filterUsers();
+  }, [searchTerm, statusFilter, users]);
 
-  const handleOpenModal = (user, type) => {
-    setSelectedUser(user);
-    setModalType(type);
-    setShowModal(true);
-    setSuspendReason('');
-    setSuspendFeedback('');
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setSelectedUser(null);
-    setModalType('');
-    setSuspendReason('');
-    setSuspendFeedback('');
-  };
-
-  const handleApprove = async () => {
-    if (!selectedUser) return;
-
+  const fetchUsers = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${selectedUser.email}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/users`);
+      const data = await res.json();
+      setUsers(data);
+      setFilteredUsers(data);
+    } catch (err) {
+      console.error(err);
+      Swal.fire('Error', 'Failed to fetch users', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filterUsers = () => {
+    let filtered = users;
+    if (searchTerm) {
+      filtered = filtered.filter(user => 
+        user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(user => user.status === statusFilter);
+    }
+    setFilteredUsers(filtered);
+  };
+
+  const handleStatusChange = async (userEmail, currentStatus) => {
+    const newStatus = currentStatus === 'approved' ? 'suspended' : 'approved';
+    if (newStatus === 'suspended') {
+      const { value: reason } = await Swal.fire({
+        title: 'Suspend User',
+        input: 'textarea',
+        inputLabel: 'Suspension Reason',
+        inputPlaceholder: 'Enter reason for suspension...',
+        showCancelButton: true,
+        confirmButtonText: 'Suspend',
+        confirmButtonColor: '#d33',
+        inputValidator: (value) => {
+          if (!value) {
+            return 'You must provide a reason!';
+          }
+        }
+      });
+      if (!reason) return;
+
+      await updateUserStatus(userEmail, newStatus, reason);
+    } else {
+      await updateUserStatus(userEmail, newStatus);
+    }
+  };
+
+  const updateUserStatus = async (userEmail, status, suspendReason = '') => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${userEmail}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status: 'approved',
-          suspendReason: null,
-          suspendFeedback: null
-        })
+        body: JSON.stringify({ status, suspendReason })
       });
 
       if (response.ok) {
         Swal.fire({
           icon: 'success',
-          title: 'User Approved!',
-          text: `${selectedUser.name} has been approved successfully`,
-          timer: 2000,
-          showConfirmButton: false
+          title: 'Status Updated!',
+          showConfirmButton: false,
+          timer: 1500
         });
         fetchUsers();
-        handleCloseModal();
       }
     } catch (error) {
-      console.error(error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Failed',
-        text: 'Could not approve user'
-      });
+      Swal.fire('Error', 'Failed to update status', 'error');
     }
   };
 
-  const handleSuspend = async () => {
-    if (!selectedUser) return;
+  const handleRoleChange = async (userEmail, currentRole) => {
+    const { value: newRole } = await Swal.fire({
+      title: 'Change User Role',
+      input: 'select',
+      inputOptions: {
+        buyer: 'Buyer',
+        manager: 'Manager',
+        admin: 'Admin'
+      },
+      inputValue: currentRole,
+      showCancelButton: true,
+      confirmButtonText: 'Update Role'
+    });
 
-    if (!suspendReason.trim()) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Reason Required',
-        text: 'Please provide a reason for suspension'
-      });
-      return;
-    }
-
-    if (!suspendFeedback.trim()) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Feedback Required',
-        text: 'Please provide feedback for the user'
-      });
-      return;
-    }
-
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${selectedUser.email}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status: 'suspended',
-          suspendReason: suspendReason,
-          suspendFeedback: suspendFeedback,
-          suspendedAt: new Date()
-        })
-      });
-
-      if (response.ok) {
-        Swal.fire({
-          icon: 'success',
-          title: 'User Suspended!',
-          text: `${selectedUser.name} has been suspended`,
-          timer: 2000,
-          showConfirmButton: false
+    if (newRole && newRole !== currentRole) {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${userEmail}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role: newRole })
         });
-        fetchUsers();
-        handleCloseModal();
+
+        if (response.ok) {
+          Swal.fire('Success!', 'Role updated successfully', 'success');
+          fetchUsers();
+        }
+      } catch (error) {
+        Swal.fire('Error', 'Failed to update role', 'error');
       }
-    } catch (error) {
-      console.error(error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Failed',
-        text: 'Could not suspend user'
-      });
     }
-  };
-
-  const getRoleBadge = (role) => {
-    const styles = {
-      admin: 'bg-purple-100 text-purple-800',
-      manager: 'bg-blue-100 text-blue-800',
-      buyer: 'bg-green-100 text-green-800',
-    };
-    return styles[role?.toLowerCase()] || 'bg-gray-100 text-gray-800';
-  };
-
-  const getStatusBadge = (status) => {
-    const styles = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      approved: 'bg-green-100 text-green-800',
-      suspended: 'bg-red-100 text-red-800',
-    };
-    return styles[status?.toLowerCase()] || 'bg-gray-100 text-gray-800';
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center min-h-96">
         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-600"></div>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">Manage Users</h2>
-        <p className="text-gray-600">Approve or suspend user accounts</p>
+    <div className="bg-white rounded-xl shadow-lg p-6">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">Manage Users</h1>
+      {/* search */}
+      <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          <input
+            type="text"
+            placeholder="Search by name or email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          />
+        </div>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+        >
+          <option value="all">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="suspended">Suspended</option>
+        </select>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Total Users</p>
-              <p className="text-3xl font-bold text-gray-800">{users.length}</p>
-            </div>
-            <Users className="text-indigo-600" size={40} />
-          </div>
-        </div>
+      {/* Users Count */}
+      <p className="text-sm text-gray-600 mb-4">
+        Showing {filteredUsers.length} of {users.length} users
+      </p>
 
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Buyers</p>
-              <p className="text-3xl font-bold text-green-600">
-                {users.filter(u => u.role === 'buyer').length}
-              </p>
-            </div>
-            <Users className="text-green-600" size={40} />
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Managers</p>
-              <p className="text-3xl font-bold text-blue-600">
-                {users.filter(u => u.role === 'manager').length}
-              </p>
-            </div>
-            <Users className="text-blue-600" size={40} />
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Suspended</p>
-              <p className="text-3xl font-bold text-red-600">
-                {users.filter(u => u.status === 'suspended').length}
-              </p>
-            </div>
-            <AlertCircle className="text-red-600" size={40} />
-          </div>
-        </div>
-      </div>
-
-      {/* Users Table */}
-      <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-sky-200">
-              <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Photo</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Email</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Role</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Status</th>
-                <th className="px-6 py-4 text-center text-sm font-semibold text-gray-600">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-300">
-              {users.map((user) => (
-                <tr key={user._id} className="hover:bg-gray-100">
-                  <td className="px-6 py-4">
-                    <img
-                      src={user.photoURL}
-                      alt={user.name}
-                      className="w-10 h-10 rounded-full"
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-blue-200">
+            <tr>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Role</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {filteredUsers.map(user => (
+              <tr key={user._id} className="hover:bg-gray-50 transition">
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={user.photoURL || 'https://i.pravatar.cc/150'} 
+                      alt={user.name} 
+                      className="w-10 h-10 rounded-full border-2 border-gray-200" 
                     />
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="font-medium text-gray-800">{user.name}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm text-gray-600">{user.email}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${getRoleBadge(user.role)}`}>
-                      {user.role}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${getStatusBadge(user.status)}`}>
-                      {user.status || 'pending'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-center gap-2">
-                      {user.status !== 'approved' && (
-                        <button
-                          onClick={() => handleOpenModal(user, 'approve')}
-                          className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-all"
-                          title="Approve User"
-                        >
-                          <CheckCircle size={18} />
-                        </button>
-                      )}
-                      {user.status !== 'suspended' && (
-                        <button
-                          onClick={() => handleOpenModal(user, 'suspend')}
-                          className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-all"
-                          title="Suspend User"
-                        >
-                          <XCircle size={18} />
-                        </button>
-                      )}
-                      {user.status === 'suspended' && (
-                        <button
-                          onClick={() => handleOpenModal(user, 'approve')}
-                          className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-all"
-                          title="Unsuspend User"
-                        >
-                          <CheckCircle size={18} />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                    <span className="font-semibold text-gray-800">{user.name}</span>
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-600">{user.email}</td>
+                <td className="px-4 py-3">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    user.role === 'admin' ? 'bg-red-100 text-red-700' :
+                    user.role === 'manager' ? 'bg-blue-100 text-blue-700' :
+                    'bg-green-100 text-green-700'
+                  }`}>
+                    {user.role}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    user.status === 'approved' ? 'bg-green-100 text-green-700' :
+                    user.status === 'suspended' ? 'bg-red-100 text-red-700' :
+                    'bg-yellow-100 text-yellow-700'
+                  }`}>
+                    {user.status}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex justify-center gap-2">
+                    <button
+                      onClick={() => handleRoleChange(user.email, user.role)}
+                      className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition"
+                      title="Change Role"
+                    >
+                      <Edit size={18} />
+                    </button>
+                    <button
+                      onClick={() => handleStatusChange(user.email, user.status)}
+                      className={`p-2 rounded-lg transition flex items-center gap-1 ${
+                        user.status === 'approved' 
+                          ? 'bg-red-100 text-red-600 hover:bg-red-200' 
+                          : 'bg-green-100 text-green-600 hover:bg-green-200'
+                      }`}
+                      title={user.status === 'approved' ? 'Suspend' : 'Approve'}
+                    >
+                      {user.status === 'approved' ? <UserX size={18} /> : <UserCheck size={18} />}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-      {/* Modal */}
-      {showModal && selectedUser && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">
-              {modalType === 'approve' ? 'Approve User' : 'Suspend User'}
-            </h3>
-
-            <div className="mb-4">
-              <p className="text-sm text-gray-600">User Name</p>
-              <p className="font-semibold text-gray-800">{selectedUser.name}</p>
-            </div>
-
-            <div className="mb-6">
-              <p className="text-sm text-gray-600">Email</p>
-              <p className="font-semibold text-gray-800">{selectedUser.email}</p>
-            </div>
-
-            {modalType === 'suspend' && (
-              <>
-                <div className="mb-4">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Reason for Suspension <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    value={suspendReason}
-                    onChange={(e) => setSuspendReason(e.target.value)}
-                    rows="3"
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-600 focus:outline-none"
-                    placeholder="Internal reason for admin records..."
-                  ></textarea>
-                </div>
-
-                <div className="mb-6">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Feedback for User <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    value={suspendFeedback}
-                    onChange={(e) => setSuspendFeedback(e.target.value)}
-                    rows="3"
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-600 focus:outline-none"
-                    placeholder="Message that will be shown to the user..."
-                  ></textarea>
-                  <p className="text-xs text-gray-500 mt-1">
-                    This message will be visible to the user on their profile
-                  </p>
-                </div>
-              </>
-            )}
-
-            <div className="flex gap-3">
-              <button
-                onClick={handleCloseModal}
-                className="flex-1 px-4 py-3 bg-gray-200 text-gray-800 rounded-xl font-semibold hover:bg-gray-300 transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={modalType === 'approve' ? handleApprove : handleSuspend}
-                className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all ${
-                  modalType === 'approve'
-                    ? 'bg-green-600 text-white hover:bg-green-700'
-                    : 'bg-red-600 text-white hover:bg-red-700'
-                }`}
-              >
-                {modalType === 'approve' ? 'Approve' : 'Suspend'}
-              </button>
-            </div>
+        {filteredUsers.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No users found</p>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
