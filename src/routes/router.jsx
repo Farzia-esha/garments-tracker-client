@@ -20,7 +20,10 @@ import MyProfile from "../pages/Dashboard/Manager/MyProfile";
 import MyOrders from "../pages/Dashboard/buyer/MyOrders";
 import AboutUs from "../Components/Shared/AboutUs";
 import ContactUs from "../Components/Shared/ContactUs";
-// import TrackOrder from "../pages/Dashboard/buyer/TrackOrder";
+import PaymentSuccess from "../pages/Payment/PaymentSuccess";
+// import PaymentCancelled from "../pages/Payment/PaymentCancelled";
+import PaymentModal from "../pages/Payment/PaymentModal";
+// import TrackOrder from "../pages/Dashboard/Buyer/TrackOrder";
 
 export const router = createBrowserRouter([
   {
@@ -57,7 +60,28 @@ export const router = createBrowserRouter([
                       <BookingForm />
                     </PrivateRoute>
         },
-        
+        {
+          path:'payment-success',
+          element:<PrivateRoute><PaymentSuccess/></PrivateRoute>
+        },
+        // {
+        //   path:'payment-cancelled',
+        //   element:<PrivateRoute><PaymentCancelled/></PrivateRoute>
+        // }
+
+        {
+        path: "payment",
+        element: <PrivateRoute>
+          <PaymentModal />
+        </PrivateRoute>
+      },
+
+      // {
+      //   path: "payment-cancelled",
+      //   element: <PrivateRoute>
+      //     <PaymentCancelled />
+      //   </PrivateRoute>
+      // },
 
     ]
   },

@@ -9,8 +9,9 @@ import Loading from "../../Components/Shared/Loading";
 const ProductDetails = () => {
   const { id } = useParams();
   const { user } = useAuth();
-  const { userRole, userStatus, loading: roleLoading } = useUserRole(); // ✅ Fixed
+  const { userRole, userStatus, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
+
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +23,6 @@ const ProductDetails = () => {
         const data = await res.json();
         setProduct(data);
       } catch (error) {
-        console.error(error);
         Swal.fire("Error", "Failed to load product details", "error");
       } finally {
         setLoading(false);
@@ -37,7 +37,6 @@ const ProductDetails = () => {
         icon: "warning",
         title: "Please Login",
         text: "You need to login to place an order",
-        confirmButtonColor: "#4F46E5",
       }).then(() => navigate("/login", { state: { from: `/product/${id}` } }));
       return;
     }
@@ -88,12 +87,12 @@ const ProductDetails = () => {
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4">
       <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Side - Image */}
+        {/* Left - Image */}
         <div className="bg-gray-100 h-96 flex items-center justify-center">
           <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
         </div>
 
-        {/* Right Side - Info */}
+        {/* Right - Info */}
         <div className="p-8 flex flex-col">
           <span className="inline-block bg-indigo-100 text-indigo-600 px-4 py-1 rounded-full text-sm font-semibold mb-3 w-fit">
             {product.category}
@@ -108,7 +107,7 @@ const ProductDetails = () => {
                 <DollarSign className="text-indigo-600" size={20} />
                 <span className="text-sm text-gray-600">Price</span>
               </div>
-              <p className="text-2xl font-bold text-indigo-600">{product.price}</p>
+              <p className="text-2xl font-bold text-indigo-600">{product.price} BDT</p>
             </div>
 
             <div className="bg-green-50 rounded-xl p-4 border border-green-200">
@@ -130,37 +129,6 @@ const ProductDetails = () => {
               <span className="font-semibold">{product.paymentMode || "N/A"}</span>
             </div>
           </div>
-
-          {/* Status Messages */}
-          {user && userStatus === "suspended" && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-              <XCircle className="text-red-500 flex-shrink-0 mt-0.5" size={20} />
-              <div>
-                <p className="font-semibold text-red-800">Account Suspended</p>
-                <p className="text-sm text-red-600">Contact support for more info.</p>
-              </div>
-            </div>
-          )}
-
-          {user && userStatus === "pending" && (
-            <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-3">
-              <AlertCircle className="text-yellow-500 flex-shrink-0 mt-0.5" size={20} />
-              <div>
-                <p className="font-semibold text-yellow-800">Account Pending</p>
-                <p className="text-sm text-yellow-600">Awaiting admin approval.</p>
-              </div>
-            </div>
-          )}
-
-          {user && canOrder && (
-            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
-              <CheckCircle className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
-              <div>
-                <p className="font-semibold text-green-800">Ready to Order</p>
-                <p className="text-sm text-green-600">You can place an order for this product.</p>
-              </div>
-            </div>
-          )}
 
           <button
             onClick={handleOrderClick}

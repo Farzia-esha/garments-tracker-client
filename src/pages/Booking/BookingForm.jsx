@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import useAuth from "../../hooks/useAuth";
+import PaymentModal from "../Payment/PaymentModal";
 
 const BookingForm = () => {
   const { id } = useParams();
@@ -12,6 +13,9 @@ const BookingForm = () => {
   const [qty, setQty] = useState("");
   const [total, setTotal] = useState(0);
 
+  const [showModal, setShowModal] = useState(false);
+  const [bookingData, setBookingData] = useState(null);
+
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/products/${id}`)
       .then(res => res.json())
@@ -19,30 +23,17 @@ const BookingForm = () => {
   }, [id]);
 
   useEffect(() => {
-    if (product && qty !== "") {
-      setTotal(Number(qty) * Number(product.price));
-    }
+    if (product && qty) setTotal(Number(qty) * Number(product.price));
   }, [qty, product]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (!qty) {
-      Swal.fire("Error", "Please enter a quantity", "error");
+    if (qty < product.minOrder || qty > product.quantity) {
+      Swal.fire("Error", "Invalid quantity", "error");
       return;
     }
 
-    if (qty < product.minOrder) {
-      Swal.fire("Error", `Minimum order is ${product.minOrder}`, "error");
-      return;
-    }
-
-    if (qty > product.quantity) {
-      Swal.fire("Error", `Only ${product.quantity} pcs available`, "error");
-      return;
-    }
-
-    const bookingData = {
+    const data = {
       email: user.email,
       productId: id,
       productTitle: product.name,
@@ -55,142 +46,78 @@ const BookingForm = () => {
       address: e.target.address.value,
       notes: e.target.notes.value,
       paymentMode: product.paymentMode,
-      paymentStatus: product.paymentMode === "Online Payment" ? "pending" : "not-required",
+      paymentStatus: "pending",
       orderStatus: "pending",
       createdAt: new Date(),
     };
 
     if (product.paymentMode === "Cash On Delivery") {
-      await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
+      fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bookingData),
-      });
-
-      Swal.fire({
-        title: "Success!",
-        text: "Order placed successfully!",
-        icon: "success",
-        confirmButtonText: "OK",
+        body: JSON.stringify(data),
       }).then(() => {
+        Swal.fire("Success", "Order placed!", "success");
         navigate("/dashboard/my-orders");
       });
-
       return;
     }
 
-    Swal.fire({
-      icon: "info",
-      title: "submit order successfull",
-      timer: 1000,
-      showConfirmButton: false,
-    }).then(() => {
-      navigate("/payment", { state: bookingData });
-    });
+    setBookingData(data);
+    setShowModal(true);
   };
 
-  if (!product) {
-    return (
-      <div className="min-h-screen flex justify-center items-center text-xl">
-        Loading...
-      </div>
-    );
-  }
+  const handlePay = async () => {
+    setShowModal(false);
+    await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bookingData),
+    });
+    navigate("/payment", { state: bookingData });
+  };
+
+  if (!product) return <div className="text-center mt-20">Loading...</div>;
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-gray-50 shadow-xl rounded-xl my-10">
-      <h2 className="text-3xl font-bold mb-6">Booking Form</h2>
-
-      <form onSubmit={handleSubmit} className="space-y-5">
-
-        {/* Email */}
-        <div>
-          <label>Email</label>
-          <input
-            type="email"
-            value={user.email}
-            readOnly
-            className="input input-bordered w-full"
-          />
-        </div>
-
-        {/* Product Name */}
-        <div>
-          <label>Product</label>
-          <input
-            type="text"
-            value={product.name}
-            readOnly
-            className="input input-bordered w-full"
-          />
-        </div>
-
-        {/* Unit Price */}
-        <div>
-          <label>Unit Price</label>
-          <input
-            type="text"
-            value={product.price + " BDT"}
-            readOnly
-            className="input input-bordered w-full"
-          />
-        </div>
-
-        {/* Name Fields */}
-        <div className="grid grid-cols-2 gap-4">
-          <input name="firstName" className="input input-bordered" placeholder="First Name" required />
-          <input name="lastName" className="input input-bordered" placeholder="Last Name" required />
-        </div>
-
-        {/* Quantity */}
-        <div>
-          <label>Order Quantity</label>
+    <>
+      <div className="max-w-3xl mx-auto p-6 bg-gray-50 shadow-xl rounded-xl my-10">
+        <h2 className="text-3xl font-bold mb-6">Booking Form</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input value={user.email} readOnly className="input input-bordered w-full" />
+          <input value={product.name} readOnly className="input input-bordered w-full" />
+          <input value={product.price + " BDT"} readOnly className="input input-bordered w-full" />
+          <div className="grid grid-cols-2 gap-4">
+            <input name="firstName" required className="input input-bordered" placeholder="First Name" />
+            <input name="lastName" required className="input input-bordered" placeholder="Last Name" />
+          </div>
           <input
             type="number"
             min={product.minOrder}
             max={product.quantity}
-            required
             value={qty}
             onChange={(e) => setQty(e.target.value)}
+            required
             className="input input-bordered w-full"
+            placeholder="Quantity"
           />
-        </div>
+          <input value={total + " BDT"} readOnly className="input input-bordered w-full" />
+          <input name="contact" required className="input input-bordered w-full" placeholder="Contact" />
+          <textarea name="address" required className="textarea textarea-bordered w-full" placeholder="Address" />
+          <textarea name="notes" className="textarea textarea-bordered w-full" placeholder="Notes" />
+          <button className="btn btn-primary w-full text-lg">Submit Order</button>
+        </form>
+      </div>
 
-        {/* Total Price */}
-        <div>
-          <label>Total Price</label>
-          <input
-            type="text"
-            value={total + " BDT"}
-            readOnly
-            className="input input-bordered w-full"
-          />
-        </div>
-
-        {/* Contact */}
-        <div>
-          <label>Contact Number</label>
-          <input name="contact" required className="input input-bordered w-full" placeholder="01xxxxxxxxx" />
-        </div>
-
-        {/* Address */}
-        <div>
-          <label>Delivery Address</label>
-          <textarea name="address" required className="textarea textarea-bordered w-full"></textarea>
-        </div>
-
-        {/* Notes */}
-        <div>
-          <label>Additional Notes</label>
-          <textarea name="notes" className="textarea textarea-bordered w-full"></textarea>
-        </div>
-
-        <button className="btn btn-primary w-full py-3 text-lg">Submit Order</button>
-
-      </form>
-    </div>
+      {/* Payment Modal */}
+      <PaymentModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        bookingData={bookingData}
+        onPay={handlePay}
+      />
+    </>
   );
 };
 
 export default BookingForm;
-

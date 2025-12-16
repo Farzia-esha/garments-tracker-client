@@ -42,7 +42,7 @@ const WhyChooseUs = () => {
                 key={feature._id}
                 className="relative bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 group"
               >
-                <div className={`w-16 h-16 flex items-center justify-center rounded-xl bg-gradient-to-br ${feature.color} `}>
+                <div className={`w-16 h-16 flex items-center justify-center rounded-xl  `}>
                   <IconComponent size={32} />
                 </div>
 
@@ -50,10 +50,6 @@ const WhyChooseUs = () => {
                   {feature.title}
                 </h3>
                 <p className="text-gray-600 leading-relaxed">{feature.description}</p>
-
-                <div
-                  className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
-                ></div>
               </div>
             );
           })}
