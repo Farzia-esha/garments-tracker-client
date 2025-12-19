@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Outlet, useNavigate, NavLink } from 'react-router';
-import { Menu, X, Home, Package, ShoppingCart, Users, LogOut, LayoutDashboard, Plus, CheckCircle, Clock, User } from 'lucide-react';
+import { Menu, X, Home, Package, ShoppingCart, Users, LogOut, LayoutDashboard, Plus, CheckCircle, Clock, User, MapPin } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import useUserRole from '../hooks/useUserRole';
 import Logo from '../Components/Logo/Logo';
@@ -36,7 +36,7 @@ const DashboardLayout = () => {
     } else {
       return [
         { icon: <ShoppingCart size={20} />, label: 'My Orders', path: '/dashboard/my-orders' },
-        { icon: <ShoppingCart size={20} />, label: 'Track Order', path: '/dashboard/track-order/:orderId' },
+        { icon: <MapPin size={20} />, label: 'Track Orders', path: '/dashboard/track-orders' },
       ];
     }
   };
@@ -144,6 +144,14 @@ const DashboardLayout = () => {
               >
                 <Home size={20} />
                 <span className="hidden md:inline">Home</span>
+              </NavLink>
+              {/* all products Link */}
+              <NavLink
+                to="/all-products"
+                className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-semibold transition"
+              >
+                <Package size={20} />
+                <span className="hidden md:inline">All Products</span>
               </NavLink>
 
               {/* User Info */}

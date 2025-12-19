@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams } from "react-router";
 import Swal from "sweetalert2";
 import useAuth from "../../hooks/useAuth";
 import PaymentModal from "../Payment/PaymentModal";
@@ -7,19 +7,17 @@ import PaymentModal from "../Payment/PaymentModal";
 const BookingForm = () => {
   const { id } = useParams();
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
   const [qty, setQty] = useState("");
   const [total, setTotal] = useState(0);
-
-  const [showModal, setShowModal] = useState(false);
   const [bookingData, setBookingData] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/products/${id}`)
-      .then(res => res.json())
-      .then(data => setProduct(data));
+      .then((res) => res.json())
+      .then((data) => setProduct(data));
   }, [id]);
 
   useEffect(() => {
@@ -28,6 +26,7 @@ const BookingForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     if (qty < product.minOrder || qty > product.quantity) {
       Swal.fire("Error", "Invalid quantity", "error");
       return;
@@ -51,30 +50,8 @@ const BookingForm = () => {
       createdAt: new Date(),
     };
 
-    if (product.paymentMode === "Cash On Delivery") {
-      fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      }).then(() => {
-        Swal.fire("Success", "Order placed!", "success");
-        navigate("/dashboard/my-orders");
-      });
-      return;
-    }
-
     setBookingData(data);
-    setShowModal(true);
-  };
-
-  const handlePay = async () => {
-    setShowModal(false);
-    await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(bookingData),
-    });
-    navigate("/payment", { state: bookingData });
+    setShowModal(true); 
   };
 
   if (!product) return <div className="text-center mt-20">Loading...</div>;
@@ -109,13 +86,13 @@ const BookingForm = () => {
         </form>
       </div>
 
-      {/* Payment Modal */}
-      <PaymentModal
-        open={showModal}
-        onClose={() => setShowModal(false)}
-        bookingData={bookingData}
-        onPay={handlePay}
-      />
+      {showModal && bookingData && (
+        <PaymentModal
+          open={showModal}
+          onClose={() => setShowModal(false)}
+          bookingData={bookingData}
+        />
+      )}
     </>
   );
 };

@@ -8,8 +8,7 @@ const PaymentCancelled = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 p-4">
       <div className="max-w-2xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden">
-        {/* Cancelled Header */}
-        <div className="bg-gradient-to-r from-red-500 to-orange-600 text-white p-8 text-center">
+        <div className="bg-gray-800 text-white p-8 text-center">
           <XCircle className="w-20 h-20 mx-auto mb-4" />
           <h1 className="text-3xl font-bold mb-2">Payment Cancelled</h1>
           <p className="text-red-100">Your payment was not completed</p>

@@ -17,86 +17,70 @@ import AddProduct from "../pages/Dashboard/manager/AddProduct";
 import PendingOrders from "../pages/Dashboard/manager/PendingOrders";
 import ApprovedOrders from "../pages/Dashboard/manager/ApprovedOrders";
 import MyProfile from "../pages/Dashboard/Manager/MyProfile";
-import MyOrders from "../pages/Dashboard/buyer/MyOrders";
+import MyOrders from "../pages/Dashboard/Buyer/MyOrders";
 import AboutUs from "../Components/Shared/AboutUs";
 import ContactUs from "../Components/Shared/ContactUs";
 import PaymentSuccess from "../pages/Payment/PaymentSuccess";
-// import PaymentCancelled from "../pages/Payment/PaymentCancelled";
-import PaymentModal from "../pages/Payment/PaymentModal";
-// import TrackOrder from "../pages/Dashboard/Buyer/TrackOrder";
+import PaymentCancelled from "../pages/Payment/PaymentCancelled";
+import ManageTracking from "../pages/Dashboard/Admin/ManageTracking";
+import TrackOrder from "../pages/Dashboard/Buyer/TrackOrder";
+import TrackOrders from "../pages/Dashboard/Buyer/TrackOrders";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    Component:RootLayout,
+    element:<RootLayout/>,
     children:[
         {
             index:true,
-            Component:Home
+            element:<Home/>,
         },
         {
           path:'about',
-          Component:AboutUs
+          element:<AboutUs/>
         },
         {
           path:'contact',
-          Component: ContactUs,
+          element:<ContactUs/>,
           loader:()=>fetch('/serviceCenters.json').then(res=>res.json())
         },
         {
           path:'all-products',
-          Component: AllProducts,
+          element:<AllProducts/>
 
         },
         {
             path:'product/:id',
-            element:<PrivateRoute>
-                      <ProductDetails></ProductDetails>
-                    </PrivateRoute>
+            element:<PrivateRoute> <ProductDetails></ProductDetails> </PrivateRoute>
         },
         {
             path: "booking/:id",
-            element:<PrivateRoute>
-                      <BookingForm />
-                    </PrivateRoute>
+            element:<PrivateRoute> <BookingForm /> </PrivateRoute>
         },
-        {
-          path:'payment-success',
-          element:<PrivateRoute><PaymentSuccess/></PrivateRoute>
-        },
-        // {
-        //   path:'payment-cancelled',
-        //   element:<PrivateRoute><PaymentCancelled/></PrivateRoute>
-        // }
 
         {
-        path: "payment",
-        element: <PrivateRoute>
-          <PaymentModal />
-        </PrivateRoute>
+        path: "payment-success",
+        element: <PrivateRoute> <PaymentSuccess />  </PrivateRoute>
       },
 
-      // {
-      //   path: "payment-cancelled",
-      //   element: <PrivateRoute>
-      //     <PaymentCancelled />
-      //   </PrivateRoute>
-      // },
+      {
+        path: "payment-cancelled",
+        element: <PrivateRoute> <PaymentCancelled /> </PrivateRoute>
+      },
 
     ]
   },
   {
     path:'/',
-    Component:AuthLayout,
+    element: <AuthLayout/>,
     children:[
         {
             path:'login',
-            Component:Login,
+            element:<Login/>
         },
         {
             path:'register',
-            Component: Register,
-
+            element:<Register/>
         }
     ]
   },
@@ -124,6 +108,10 @@ export const router = createBrowserRouter([
       {
         path: 'all-orders',
         element: <AllOrders />
+      },
+      {
+        path:'manage-tracking',
+        element:<ManageTracking />
       },
 
       //manager
@@ -153,11 +141,15 @@ export const router = createBrowserRouter([
         path:'my-orders',
         element: <MyOrders />
       },
-      // {
-      //   path:'track-order/:orderId',
-      //   element:<TrackOrder />
+      {
+        path:'track-orders',
+        element:<TrackOrders />
+      },
+      {
+        path:'track-order/:orderId',
+        element:<TrackOrder />
 
-      // }
+      }
 
     ]
   }

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Eye, XCircle, MapPin } from 'lucide-react';
 import Swal from 'sweetalert2';
 import useAuth from '../../../hooks/useAuth';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router'; 
+import Loading from '../../../Components/Shared/Loading';
 
 const MyOrders = () => {
   const { user } = useAuth();
@@ -37,8 +38,8 @@ const MyOrders = () => {
           <p><strong>Order ID:</strong> ${order._id}</p>
           <p><strong>Product:</strong> ${order.productTitle}</p>
           <p><strong>Quantity:</strong> ${order.quantity} pcs</p>
-          <p><strong>Unit Price:</strong> ${order.unitPrice}</p>
-          <p><strong>Total Price:</strong> ${order.totalPrice}</p>
+          <p><strong>Unit Price:</strong> BDT ${order.unitPrice}</p>
+          <p><strong>Total Price:</strong> BDT ${order.totalPrice}</p>
           <p><strong>Contact:</strong> ${order.contact}</p>
           <p><strong>Delivery Address:</strong> ${order.address}</p>
           <p><strong>Payment Mode:</strong> ${order.paymentMode}</p>
@@ -53,6 +54,7 @@ const MyOrders = () => {
           <p><strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleDateString()}</p>
           ${order.notes ? `<p><strong>Notes:</strong> ${order.notes}</p>` : ''}
           ${order.rejectionReason ? `<p class="text-red-600"><strong>Rejection Reason:</strong> ${order.rejectionReason}</p>` : ''}
+          ${order.expectedDelivery ? `<p><strong>Expected Delivery:</strong> ${new Date(order.expectedDelivery).toLocaleDateString()}</p>` : ''}
         </div>
       `,
       width: '600px',
@@ -77,56 +79,22 @@ const MyOrders = () => {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings/${orderId}`, {
           method: 'DELETE'
         });
-
         if (response.ok) {
           Swal.fire('Cancelled!', 'Your order has been cancelled.', 'success');
           fetchOrders();
+        } else {
+          throw new Error('Failed to cancel order');
         }
       } catch (error) {
+        console.error(error);
         Swal.fire('Error', 'Failed to cancel order', 'error');
       }
     }
   };
 
-  const viewTracking = async (orderId, productTitle) => {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/tracking/${orderId}`);
-      const trackingData = await res.json();
-
-      if (trackingData.length === 0) {
-        Swal.fire('No Tracking Available', 'Tracking information will be updated soon', 'info');
-        return;
-      }
-
-      const timeline = trackingData.map((t, index) => `
-        <div class="relative ${index !== trackingData.length - 1 ? 'pb-6' : ''}">
-          <div class="flex items-start gap-4">
-            <div class="flex-shrink-0 w-10 h-10 rounded-full ${
-              index === 0 ? 'bg-green-500' : 'bg-gray-300'
-            } flex items-center justify-center text-white font-bold">
-              ${index + 1}
-            </div>
-            <div class="flex-1">
-              <p class="font-bold text-lg">${t.status}</p>
-              <p class="text-sm text-gray-600"> ${t.location}</p>
-              <p class="text-xs text-gray-500">${new Date(t.timestamp).toLocaleString()}</p>
-              ${t.note ? `<p class="text-sm mt-1 text-gray-700">${t.note}</p>` : ''}
-            </div>
-          </div>
-          ${index !== trackingData.length - 1 ? '<div class="absolute left-5 top-10 bottom-0 w-0.5 bg-gray-200"></div>' : ''}
-        </div>
-      `).join('');
-
-      Swal.fire({
-        title: `Tracking: ${productTitle}`,
-        html: `<div class="text-left p-4">${timeline}</div>`,
-        width: '700px',
-        confirmButtonText: 'Close',
-        confirmButtonColor: '#4F46E5'
-      });
-    } catch (error) {
-      Swal.fire('Error', 'Failed to fetch tracking information', 'error');
-    }
+  const handleTrackOrder = (orderId) => {
+    console.log('Navigating to track order:', orderId);
+    navigate(`/dashboard/track-order/${orderId}`);
   };
 
   const getStatusColor = (status) => {
@@ -147,13 +115,9 @@ const MyOrders = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-96">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-indigo-600"></div>
-      </div>
-    );
-  }
+  if (loading) { return <Loading />}
+
+const normalizeStatus = (status) => status?.toLowerCase() || "";
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
@@ -169,18 +133,6 @@ const MyOrders = () => {
           <p className="text-sm text-gray-600">Pending</p>
           <p className="text-2xl font-bold text-yellow-600">
             {orders.filter(o => o.orderStatus === 'pending').length}
-          </p>
-        </div>
-        <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-          <p className="text-sm text-gray-600">Approved</p>
-          <p className="text-2xl font-bold text-green-600">
-            {orders.filter(o => o.orderStatus === 'approved').length}
-          </p>
-        </div>
-        <div className="bg-red-50 rounded-lg p-4 border border-red-200">
-          <p className="text-sm text-gray-600">Rejected</p>
-          <p className="text-2xl font-bold text-red-600">
-            {orders.filter(o => o.orderStatus === 'rejected').length}
           </p>
         </div>
       </div>
@@ -202,6 +154,7 @@ const MyOrders = () => {
           <tbody className="divide-y divide-gray-200">
             {orders.map(order => (
               <tr key={order._id} className="hover:bg-gray-50">
+                {console.log('ORDER:',order._id)}
                 <td className="px-4 py-3">
                   <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
                     {order._id.slice(-6)}
@@ -215,7 +168,7 @@ const MyOrders = () => {
                 </td>
                 <td className="px-4 py-3 text-sm">{order.quantity} pcs</td>
                 <td className="px-4 py-3">
-                  <span className="font-bold text-indigo-600">৳{order.totalPrice}</span>
+                  <span className="font-bold text-indigo-600">{order.totalPrice}</span>
                 </td>
                 <td className="px-4 py-3">
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.orderStatus)}`}>
@@ -231,24 +184,24 @@ const MyOrders = () => {
                   <div className="flex justify-center gap-2">
                     <button
                       onClick={() => viewOrderDetails(order)}
-                      className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200"
+                      className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
                       title="View Details"
                     >
                       <Eye size={18} />
                     </button>
-                    {order.orderStatus === 'approved' && (
+                    {normalizeStatus(order.paymentStatus) === 'paid' && (
                       <button
-                        onClick={() => viewTracking(order._id, order.productTitle)}
-                        className="p-2 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200"
+                        onClick={() => handleTrackOrder(order._id)}
+                        className="p-2 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors"
                         title="Track Order"
                       >
                         <MapPin size={18} />
                       </button>
                     )}
-                    {order.orderStatus === 'pending' && (
+                    {normalizeStatus(order.orderStatus) === 'pending' && (
                       <button
                         onClick={() => handleCancelOrder(order._id, order.productTitle)}
-                        className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
+                        className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
                         title="Cancel Order"
                       >
                         <XCircle size={18} />
@@ -266,7 +219,7 @@ const MyOrders = () => {
             <p className="text-gray-500 text-lg mb-4">No orders yet</p>
             <button
               onClick={() => navigate('/all-products')}
-              className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
             >
               Browse Products
             </button>
