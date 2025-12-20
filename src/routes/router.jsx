@@ -25,11 +25,14 @@ import PaymentCancelled from "../pages/Payment/PaymentCancelled";
 import ManageTracking from "../pages/Dashboard/Admin/ManageTracking";
 import TrackOrder from "../pages/Dashboard/Buyer/TrackOrder";
 import TrackOrders from "../pages/Dashboard/Buyer/TrackOrders";
+import ErrorPage from "../pages/Home/ErrorPage";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element:<RootLayout/>,
+    errorElement: <ErrorPage />,
+
     children:[
         {
             index:true,
