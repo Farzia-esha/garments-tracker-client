@@ -1,7 +1,12 @@
 
+
+
 import React, { useState } from 'react';
 import { Outlet, useNavigate, NavLink } from 'react-router';
-import { Menu, X, Home, Package, ShoppingCart, Users, LogOut, LayoutDashboard, Plus, CheckCircle, Clock, User, MapPin } from 'lucide-react';
+import {
+  Menu, X, Home, Package, ShoppingCart, Users, LogOut,
+  LayoutDashboard, Plus, CheckCircle, Clock, User, MapPin
+} from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import useUserRole from '../hooks/useUserRole';
 import Logo from '../Components/Logo/Logo';
@@ -10,6 +15,7 @@ import SmallFooter from '../Components/Shared/SmallFooter';
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isManagerMenuOpen, setIsManagerMenuOpen] = useState(false); // collapsible manager menu
   const { user, logOut } = useAuth();
   const { userRole, loading } = useUserRole();
   const navigate = useNavigate();
@@ -41,19 +47,20 @@ const DashboardLayout = () => {
     }
   };
 
-  if (loading) { return <Loading />; }
+  if (loading) return <Loading />;
 
   const menuItems = getMenuItems();
 
   return (
     <div className="flex h-screen bg-gray-100">
+      {/* Sidebar */}
       <aside
         className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-indigo-800 to-indigo-900 text-white transform transition-transform duration-300 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         <div className="flex flex-col h-full">
-          {/* Logo Section */}
+          {/* Logo */}
           <div className="p-6 border-b border-white/10">
             <NavLink to="/" onClick={() => setIsSidebarOpen(false)}>
               <Logo />
@@ -63,7 +70,7 @@ const DashboardLayout = () => {
             </p>
           </div>
 
-          {/* Navigation Menu */}
+          {/* Navigation */}
           <nav className="flex-1 p-4 overflow-y-auto">
             <ul className="space-y-2">
               {menuItems.map((item, index) => (
@@ -73,9 +80,7 @@ const DashboardLayout = () => {
                     onClick={() => setIsSidebarOpen(false)}
                     className={({ isActive }) =>
                       `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                        isActive
-                          ? 'bg-white/20 text-white font-semibold'
-                          : 'hover:bg-white/10'
+                        isActive ? 'bg-white/20 text-white font-semibold' : 'hover:bg-white/10'
                       }`
                     }
                   >
@@ -84,19 +89,77 @@ const DashboardLayout = () => {
                   </NavLink>
                 </li>
               ))}
+
+              {/* Admin collapsible manager menu */}
+              {userRole === 'admin' && (
+                <li>
+                  <button
+                    onClick={() => setIsManagerMenuOpen(!isManagerMenuOpen)}
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-lg hover:bg-white/10 transition-all duration-200"
+                  >
+                    <div className="flex items-center gap-3">
+                      <LayoutDashboard size={20} />
+                      <span className="font-medium">Manager Pages</span>
+                    </div>
+                    <span>{isManagerMenuOpen ? '−' : '+'}</span>
+                  </button>
+
+                  {isManagerMenuOpen && (
+                    <ul className="mt-2 ml-8 space-y-1">
+                      <li>
+                        <NavLink
+                          to="/dashboard/add-product"
+                          className={({ isActive }) =>
+                            `flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
+                              isActive ? 'bg-white/20 text-white font-semibold' : 'hover:bg-white/10'
+                            }`
+                          }
+                        >
+                          <Plus size={18} />
+                          <span className="font-medium">Add Product</span>
+                        </NavLink>
+                      </li>
+                      <li>
+                        <NavLink
+                          to="/dashboard/pending-orders"
+                          className={({ isActive }) =>
+                            `flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
+                              isActive ? 'bg-white/20 text-white font-semibold' : 'hover:bg-white/10'
+                            }`
+                          }
+                        >
+                          <Clock size={18} />
+                          <span className="font-medium">Pending Orders</span>
+                        </NavLink>
+                      </li>
+                      <li>
+                        <NavLink
+                          to="/dashboard/approved-orders"
+                          className={({ isActive }) =>
+                            `flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
+                              isActive ? 'bg-white/20 text-white font-semibold' : 'hover:bg-white/10'
+                            }`
+                          }
+                        >
+                          <CheckCircle size={18} />
+                          <span className="font-medium">Approved Orders</span>
+                        </NavLink>
+                      </li>
+                    </ul>
+                  )}
+                </li>
+              )}
             </ul>
           </nav>
 
-          {/* Bottom Section - Profile & Logout */}
+          {/* Bottom profile & logout */}
           <div className="p-4 border-t border-white/10">
             <NavLink
               to="/dashboard/profile"
               onClick={() => setIsSidebarOpen(false)}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 mb-2 ${
-                  isActive
-                    ? 'bg-white/20 text-white font-semibold'
-                    : 'hover:bg-white/10'
+                  isActive ? 'bg-white/20 text-white font-semibold' : 'hover:bg-white/10'
                 }`
               }
             >
@@ -115,6 +178,7 @@ const DashboardLayout = () => {
         </div>
       </aside>
 
+      {/* Overlay for mobile */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -122,11 +186,11 @@ const DashboardLayout = () => {
         ></div>
       )}
 
+      {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white shadow-sm">
           <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center gap-4">
-              {/* Mobile Menu Button */}
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                 className="lg:hidden text-gray-600 hover:text-gray-900"
@@ -137,7 +201,6 @@ const DashboardLayout = () => {
             </div>
 
             <div className="flex items-center gap-4">
-              {/* Home Link */}
               <NavLink
                 to="/"
                 className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-semibold transition"
@@ -145,7 +208,7 @@ const DashboardLayout = () => {
                 <Home size={20} />
                 <span className="hidden md:inline">Home</span>
               </NavLink>
-              {/* all products Link */}
+
               <NavLink
                 to="/all-products"
                 className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-semibold transition"
@@ -173,9 +236,8 @@ const DashboardLayout = () => {
         <main className="flex-1 overflow-y-auto p-6 bg-gray-50">
           <Outlet />
         </main>
-        <div>
-           <SmallFooter/>
-        </div>
+
+        <SmallFooter />
       </div>
     </div>
   );
