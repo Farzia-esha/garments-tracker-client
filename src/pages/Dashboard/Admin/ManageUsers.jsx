@@ -25,7 +25,7 @@ const ManageUsers = () => {
   // Fetch users (only manager & buyer)
   const fetchUsers = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/users`);
+      const res = await fetch(`https://garments-tracker-system.vercel.app/users`);
       let data = await res.json();
       data = data.filter(u => u.role === 'manager' || u.role === 'buyer'); // only manager/buyer
       setUsers(data);
@@ -102,7 +102,7 @@ const ManageUsers = () => {
         suspendedAt: status === 'suspended' ? new Date() : null
       };
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${userEmail}`, {
+      const response = await fetch(`https://garments-tracker-system.vercel.app/users/${userEmail}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updateData)
@@ -133,7 +133,7 @@ const ManageUsers = () => {
 
     if (newRole && newRole !== currentRole) {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${userEmail}`, {
+        const response = await fetch(`https://garments-tracker-system.vercel.app/users/${userEmail}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ role: newRole })

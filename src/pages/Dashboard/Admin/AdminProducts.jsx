@@ -13,7 +13,7 @@ const AdminProducts = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/products`);
+      const res = await fetch(`https://garments-tracker-system.vercel.app/products`);
       const data = await res.json();
       setProducts(data);
     } catch (err) {
@@ -26,7 +26,7 @@ const AdminProducts = () => {
 
   const toggleShowOnHome = async (productId, currentStatus) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/products/home/${productId}`, {
+      const response = await fetch(`https://garments-tracker-system.vercel.app/products/home/${productId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ showOnHome: !currentStatus })
@@ -60,7 +60,7 @@ const AdminProducts = () => {
 
     if (result.isConfirmed) {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/products/${productId}`, {
+        const response = await fetch(`https://garments-tracker-system.vercel.app/products/${productId}`, {
           method: 'DELETE'
         });
 

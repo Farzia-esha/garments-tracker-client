@@ -1,3 +1,5 @@
+
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
@@ -7,15 +9,13 @@ import useAuth from '../../../hooks/useAuth';
 import axios from 'axios';
 
 const AddProduct = () => {
-  const {register,handleSubmit,formState: { errors }, watch,setValue,} =useForm();
-
+  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
 
   const imageKey = import.meta.env.VITE_IMGBB_KEY;
-
   const showOnHome = watch('showOnHome', false);
 
   const handleImagePreview = (e) => {
@@ -45,26 +45,25 @@ const AddProduct = () => {
           `https://api.imgbb.com/1/upload?key=${imageKey}`,
           formData
         );
-
         uploadedImageUrl = uploadRes.data.data.url;
       }
 
       const productData = {
-        name: data.name,
+        productName: data.name,
         description: data.description,
         category: data.category,
         price: Number(data.price),
-        quantity: Number(data.quantity),
-        minOrder: Number(data.minOrder),
-        image: uploadedImageUrl,
-        demoVideo: data.demoVideo || '',
-        paymentMode: data.paymentMode,
+        availableQuantity: Number(data.quantity),
+        moq: Number(data.minOrder),
+        images: [uploadedImageUrl],
+        demoVideoLink: data.demoVideo || '',
+        paymentOption: data.paymentMode,
         showOnHome: data.showOnHome || false,
         createdBy: user?.email,
         createdAt: new Date(),
       };
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/products`, {
+      const res = await fetch(`https://garments-tracker-system.vercel.app/products`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(productData),
@@ -113,7 +112,7 @@ const AddProduct = () => {
               {...register('name', { required: 'Product name is required' })}
               className={`w-full px-4 py-3 border-2 ${
                 errors.name ? 'border-red-500' : 'border-gray-300'
-              } rounded-xl`}
+              } rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500`}
               placeholder="Enter product name"
               disabled={isLoading}
             />
@@ -132,7 +131,7 @@ const AddProduct = () => {
               {...register('description', { required: 'Description is required' })}
               className={`w-full px-4 py-3 border-2 ${
                 errors.description ? 'border-red-500' : 'border-gray-300'
-              } rounded-xl`}
+              } rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500`}
               placeholder="Write full product details..."
               disabled={isLoading}
             />
@@ -150,7 +149,7 @@ const AddProduct = () => {
               {...register('category', { required: 'Select category' })}
               className={`w-full px-4 py-3 border-2 ${
                 errors.category ? 'border-red-500' : 'border-gray-300'
-              } rounded-xl`}
+              } rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500`}
               disabled={isLoading}
             >
               <option value="">Select category</option>
@@ -180,7 +179,7 @@ const AddProduct = () => {
                 })}
                 className={`w-full px-4 py-3 border-2 ${
                   errors.price ? 'border-red-500' : 'border-gray-300'
-                } rounded-xl`}
+                } rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 placeholder="0"
                 disabled={isLoading}
               />
@@ -201,7 +200,7 @@ const AddProduct = () => {
                 })}
                 className={`w-full px-4 py-3 border-2 ${
                   errors.quantity ? 'border-red-500' : 'border-gray-300'
-                } rounded-xl`}
+                } rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 placeholder="0"
                 disabled={isLoading}
               />
@@ -224,7 +223,7 @@ const AddProduct = () => {
               })}
               className={`w-full px-4 py-3 border-2 ${
                 errors.minOrder ? 'border-red-500' : 'border-gray-300'
-              } rounded-xl`}
+              } rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500`}
               placeholder="0"
               disabled={isLoading}
             />
@@ -249,19 +248,20 @@ const AddProduct = () => {
                 <button
                   type="button"
                   onClick={clearImagePreview}
-                  className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full"
+                  className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600"
                 >
                   <X size={18} />
                 </button>
               </div>
             ) : (
-              <div className="border-2 border-gray-400 rounded-xl p-6 text-center">
+              <div className="border-2 border-dashed border-gray-400 rounded-xl p-6 text-center">
                 <input
                   type="file"
                   accept="image/*"
                   {...register('image', { required: 'Image is required' })}
                   onChange={handleImagePreview}
                   disabled={isLoading}
+                  className="w-full"
                 />
               </div>
             )}
@@ -270,6 +270,8 @@ const AddProduct = () => {
               <p className="text-red-500 text-sm mt-1">{errors.image.message}</p>
             )}
           </div>
+
+
           {/* Payment Mode */}
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -279,15 +281,15 @@ const AddProduct = () => {
               {...register('paymentMode', { required: 'Select payment method' })}
               className={`w-full px-4 py-3 border-2 ${
                 errors.paymentMode ? 'border-red-500' : 'border-gray-300'
-              } rounded-xl`}
+              } rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500`}
               disabled={isLoading}
             >
               <option value="">Select payment option</option>
-              <option value="Cash On Delivery">Cash On Delivery</option>
-              <option value="Online Payment">Online Payment</option>
+              <option value="Cash on Delivery">Cash on Delivery</option>
+              <option value="PayFirst">online payment</option>
             </select>
             {errors.paymentMode && (
-              <p className="text-red-500 text-sm mt-1">{errors.paymentMode.message}</p>
+              <p className=" text-sm mt-1">{errors.paymentMode.message}</p>
             )}
           </div>
 
@@ -298,21 +300,24 @@ const AddProduct = () => {
               {...register('showOnHome')}
               className="w-5 h-5 mr-3"
               disabled={isLoading}
+              id="showOnHome"
             />
-            <p className="text-sm text-gray-700">Show this product on home page</p>
+            <label htmlFor="showOnHome" className="text-sm text-gray-700 cursor-pointer">
+              Show this product on home page
+            </label>
           </div>
 
           {showOnHome && (
             <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
-              <p className="text-blue-700 text-sm">This product will appear on homepage</p>
+              <p className="text-blue-700 text-sm">✓ This product will appear on homepage</p>
             </div>
           )}
 
-          {/* Button */}
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-indigo-700"
+            className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 disabled:bg-gray-400 transition"
           >
             {isLoading ? 'Adding Product...' : 'Add Product'}
           </button>

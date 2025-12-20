@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
-import {Trash2, Eye, Search } from 'lucide-react';
+import { Trash2, Eye, Search, Edit, Package } from 'lucide-react';
 import Swal from 'sweetalert2';
 import useAuth from '../../../hooks/useAuth';
 import Loading from '../../../Components/Shared/Loading';
@@ -11,7 +12,7 @@ const ManageProducts = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -22,7 +23,7 @@ const ManageProducts = () => {
   }, [products, searchTerm]);
 
   const fetchProducts = () => {
-    fetch(`${import.meta.env.VITE_API_URL}/products`)
+    fetch(`https://garments-tracker-system.vercel.app/products`)
       .then(res => res.json())
       .then(data => {
         const myProducts = data.filter(p => p.createdBy === user.email);
@@ -42,8 +43,8 @@ const ManageProducts = () => {
     }
 
     const filtered = products.filter(product =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchTerm.toLowerCase())
+      product.productName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category?.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredProducts(filtered);
   };
@@ -51,17 +52,18 @@ const ManageProducts = () => {
   const handleDelete = async (productId, productName) => {
     const result = await Swal.fire({
       title: 'Delete Product?',
-      text: `Are you sure you want to delete "${productName}"?`,
+      html: `Are you sure you want to delete<br/><strong>"${productName}"</strong>?<br/><span class="text-red-600">This action cannot be undone.</span>`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, delete it!'
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
     });
 
     if (result.isConfirmed) {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/${productId}`, {
+        const response = await fetch(`https://garments-tracker-system.vercel.app/products/${productId}`, {
           method: 'DELETE'
         });
 
@@ -69,7 +71,7 @@ const ManageProducts = () => {
           Swal.fire({
             icon: 'success',
             title: 'Deleted!',
-            text: 'Product has been deleted',
+            text: 'Product has been deleted successfully',
             timer: 1500,
             showConfirmButton: false
           });
@@ -86,6 +88,34 @@ const ManageProducts = () => {
     }
   };
 
+  const handleToggleHome = async (productId, currentStatus) => {
+    try {
+      const response = await fetch(`https://garments-tracker-system.vercel.app/products/${productId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ showOnHome: !currentStatus })
+      });
+
+      if (response.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated!',
+          text: `Product ${!currentStatus ? 'will now' : 'will no longer'} appear on homepage`,
+          timer: 1500,
+          showConfirmButton: false
+        });
+        fetchProducts();
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed',
+        text: 'Could not update product'
+      });
+    }
+  };
+
   const getCategoryBadge = (category) => {
     const styles = {
       shirt: 'bg-blue-100 text-blue-800',
@@ -99,107 +129,112 @@ const ManageProducts = () => {
   };
 
   if (loading) {
-    return ( <div><Loading></Loading></div>
-    );
+    return <div><Loading /></div>;
   }
 
   return (
     <div>
-        <h2 className="text-3xl font-bold text-gray-800 mb-8">Manage Products</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">My Products</p>
-              <p className="text-3xl font-bold text-gray-800">{products.length}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Total Quantity</p>
-              <p className="text-3xl font-bold">
-                {products.reduce((sum, p) => sum + p.quantity, 0)}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Total Value</p>
-              <p className="text-3xl font-semibold ">
-                BDT {products.reduce((sum, p) => sum + (p.price * p.quantity), 0)}
-              </p>
-            </div>
-          </div>
-        </div>
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-gray-800 mb-2">Manage Products</h2>
       </div>
-      {/* Search */}
+
+      {/* Search Bar */}
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
           <input
             type="text"
-            placeholder="Search by name or category..."
+            placeholder="Search by product name or category..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-600 focus:outline-none"
+            className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition"
           />
         </div>
       </div>
+
       {/* Products Table */}
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-blue-100">
+            <thead className="bg-gradient-to-r from-blue-600 to-blue-700">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Image</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Price</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Category</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Payment Mode</th>
-                <th className="px-6 py-4 text-center text-sm font-semibold text-gray-600">Actions</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-white">Image</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-white">Product Name</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-white">Category</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-white">Price</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-white">Stock</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-white">Payment</th>
+                <th className="px-6 py-4 text-center text-sm font-semibold text-white">Homepage</th>
+                <th className="px-6 py-4 text-center text-sm font-semibold text-white">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
-                    No products found
+                  <td colSpan="8" className="px-6 py-12 text-center">
+                    <div className="flex flex-col items-center">
+                      <Package className="w-16 h-16 text-gray-300 mb-4" />
+                      <p className="text-lg font-semibold text-gray-600">No products found</p>
+                      <p className="text-sm text-gray-400">
+                        {searchTerm ? 'Try a different search term' : 'Start by adding your first product'}
+                      </p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 filteredProducts.map((product) => (
-                  <tr key={product._id} className="hover:bg-gray-50">
+                  <tr key={product._id} className="hover:bg-blue-50 transition">
                     <td className="px-6 py-4">
                       <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-16 h-16 object-cover rounded-lg"
+                        src={product.images?.[0] || product.image}
+                        alt={product.productName}
+                        className="w-16 h-16 object-cover rounded-lg shadow-md"
                       />
                     </td>
                     <td className="px-6 py-4">
-                      <span className="font-medium">{product.name}</span>
+                      <p className="font-semibold text-gray-800">{product.productName}</p>
+                      <p className="text-xs text-gray-500">MOQ: {product.moq} pcs</p>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="font-semibold">BDT {product.price}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${getCategoryBadge(product.category)}`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold capitalize ${getCategoryBadge(product.category)}`}>
                         {product.category}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-sm text-gray-600">{product.paymentMode}</span>
+                      <p className="font-bold text-green-600 text-lg">{product.price}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                        product.availableQuantity > 50 
+                          ? 'bg-green-100 text-green-700' 
+                          : product.availableQuantity > 20 
+                          ? 'bg-yellow-100 text-yellow-700' 
+                          : 'bg-red-100 text-red-700'
+                      }`}>
+                        {product.availableQuantity} pcs
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-gray-600 font-medium">{product.paymentOption}</span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <button
+                        onClick={() => handleToggleHome(product._id, product.showOnHome)}
+                        className={`px-3 py-1 rounded-full text-xs font-bold transition ${
+                          product.showOnHome 
+                            ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        {product.showOnHome ? '✓ Visible' : 'Hidden'}
+                      </button>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => {
                             setSelectedProduct(product);
-                            setShowModal(true);
+                            setShowViewModal(true);
                           }}
                           className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-all"
                           title="View Details"
@@ -207,7 +242,7 @@ const ManageProducts = () => {
                           <Eye size={18} />
                         </button>
                         <button
-                          onClick={() => handleDelete(product._id, product.name)}
+                          onClick={() => handleDelete(product._id, product.productName)}
                           className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-all"
                           title="Delete Product"
                         >
@@ -222,60 +257,103 @@ const ManageProducts = () => {
           </table>
         </div>
       </div>
+
       {/* Product Details Modal */}
-      {showModal && selectedProduct && (
+      {showViewModal && selectedProduct && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-t-2xl">
               <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-bold text-gray-800">Product Details</h3>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Product Details</h3>
+                  <p className="text-blue-100 text-sm mt-1">Complete product information</p>
+                </div>
                 <button
-                  onClick={() => setShowModal(false)}
-                  className="p-2 hover:bg-gray-100 rounded-lg"
+                  onClick={() => setShowViewModal(false)}
+                  className="p-2 hover:bg-white/20 rounded-lg text-white transition"
                 >
-                  ×
+                  <span className="text-2xl">×</span>
                 </button>
               </div>
             </div>
 
+            {/* Modal Content */}
             <div className="p-6">
-              <img
-                src={selectedProduct.image}
-                alt={selectedProduct.name}
-                className="w-full h-64 object-cover rounded-xl mb-6"
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column - Image */}
+                <div>
+                  <img
+                    src={selectedProduct.images?.[0] || selectedProduct.image}
+                    alt={selectedProduct.productName}
+                    className="w-full h-80 object-cover rounded-xl shadow-lg mb-4"
+                  />
+                  
+                  {/* Badges */}
+                  <div className="flex gap-2 flex-wrap">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${getCategoryBadge(selectedProduct.category)}`}>
+                      {selectedProduct.category}
+                    </span>
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                      {selectedProduct.paymentOption}
+                    </span>
+                    {selectedProduct.showOnHome && (
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                         On Homepage
+                      </span>
+                    )}
+                  </div>
+                </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <p className="text-sm text-gray-600">Product Name</p>
-                  <p className="font-semibold text-gray-800">{selectedProduct.name}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Category</p>
-                  <p className="font-semibold text-gray-800 capitalize">{selectedProduct.category}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Price</p>
-                  <p className="font-semibold text-indigo-600">BDT {selectedProduct.price}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Available Quantity</p>
-                  <p className="font-semibold text-gray-800">{selectedProduct.quantity} pcs</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Minimum Order</p>
-                  <p className="font-semibold text-gray-800">{selectedProduct.minOrder} pcs</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Payment Mode</p>
-                  <p className="font-semibold text-gray-800">{selectedProduct.paymentMode}</p>
+                {/* Right Column - Details */}
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-2xl font-bold text-gray-800 mb-2">{selectedProduct.productName}</h4>
+                    <p className="text-gray-600">{selectedProduct.description}</p>
+                  </div>
+
+                  {/* Price Box */}
+                  <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border-2 border-green-200">
+                    <p className="text-sm text-green-700 mb-1">Unit Price</p>
+                    <p className="text-4xl font-bold text-green-600">{selectedProduct.price}</p>
+                  </div>
+
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <p className="text-xs text-blue-600 mb-1">Available Stock</p>
+                      <p className="text-2xl font-bold text-blue-700">{selectedProduct.availableQuantity} pcs</p>
+                    </div>
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <p className="text-xs text-purple-600 mb-1">Minimum Order</p>
+                      <p className="text-2xl font-bold text-purple-700">{selectedProduct.moq} pcs</p>
+                    </div>
+                  </div>
+
+                  {/* Total Value */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-xs text-gray-600 mb-1">Total Inventory Value</p>
+                    <p className="text-2xl font-bold text-gray-800">
+                      {((selectedProduct.price || 0) * (selectedProduct.availableQuantity || 0)).toLocaleString()}
+                    </p>
+                  </div>
+
+                  {/* Created Date */}
+                  <div className="text-xs text-gray-500 pt-4 border-t">
+                    <p>Created: {new Date(selectedProduct.createdAt).toLocaleString()}</p>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <div className="mb-4">
-                <p className="text-sm text-gray-600 mb-1">Description</p>
-                <p className="text-gray-700">{selectedProduct.description}</p>
-              </div>
+            {/* Modal Footer */}
+            <div className="bg-gray-50 px-6 py-4 rounded-b-2xl flex justify-end gap-3">
+              <button
+                onClick={() => setShowViewModal(false)}
+                className="px-6 py-2 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

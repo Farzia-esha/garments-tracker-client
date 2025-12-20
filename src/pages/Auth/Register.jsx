@@ -48,7 +48,7 @@ const Register = () => {
         photoURL: uploadedImageUrl || "https://i.pravatar.cc/150",
       });
 
-      await fetch(`${import.meta.env.VITE_API_URL}/users`, {
+      await fetch(`https://garments-tracker-system.vercel.app/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -56,7 +56,7 @@ const Register = () => {
           name: data.name,
           photoURL: uploadedImageUrl || "https://i.pravatar.cc/150",
           role: data.role,
-          status: "pending",
+          status: "approved",
         }),
       });
 
@@ -95,7 +95,7 @@ const Register = () => {
     try {
       const result = await signInGoogle();
 
-      await fetch(`${import.meta.env.VITE_API_URL}/users`, {
+      await fetch(`https://garments-tracker-system.vercel.app/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -103,7 +103,7 @@ const Register = () => {
           name: result.user.displayName,
           photoURL: result.user.photoURL,
           role: "buyer",
-          status: "pending",
+          status: "approved",
         }),
       });
 

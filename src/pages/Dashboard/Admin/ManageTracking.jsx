@@ -23,7 +23,7 @@ const ManageTracking = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings`);
+      const response = await fetch(`https://garments-tracker-system.vercel.app/bookings`);
       const data = await response.json();
       
       // Only show approved bookings
@@ -59,7 +59,7 @@ const ManageTracking = () => {
 
   const handleViewTracking = async (bookingId) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/tracking/booking/${bookingId}`);
+      const response = await fetch(`https://garments-tracker-system.vercel.app/tracking/booking/${bookingId}`);
       const data = await response.json();
 
       if (data.tracking && data.tracking.length > 0) {

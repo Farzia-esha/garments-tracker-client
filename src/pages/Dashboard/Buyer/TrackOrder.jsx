@@ -30,7 +30,7 @@ const TrackOrder = () => {
       setLoading(true);
       setError(null);
 
-      const url = `${import.meta.env.VITE_API_URL}/tracking/booking/${orderId}`;
+      const url = `https://garments-tracker-system.vercel.app/tracking/booking/${orderId}`;
       console.log("Fetching from URL:", url);
 
       const response = await fetch(url);

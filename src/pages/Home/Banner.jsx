@@ -8,7 +8,7 @@ const Banner = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/banners`)
+    fetch('https://garments-tracker-system.vercel.app/banners')
       .then(res => res.json())
       .then(data => setBanners(data))
       .catch(err => console.error(err));

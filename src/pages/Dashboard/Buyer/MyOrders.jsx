@@ -19,7 +19,7 @@ const MyOrders = () => {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/bookings/${user.email}`);
+      const res = await fetch(`https://garments-tracker-system.vercel.app/bookings/${user.email}`);
       const data = await res.json();
       setOrders(data);
     } catch (err) {
@@ -76,7 +76,7 @@ const MyOrders = () => {
 
     if (result.isConfirmed) {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings/${orderId}`, {
+        const response = await fetch(`https://garments-tracker-system.vercel.app/bookings/${orderId}`, {
           method: 'DELETE'
         });
         if (response.ok) {

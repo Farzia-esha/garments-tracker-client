@@ -60,7 +60,7 @@ const Login = () => {
       const result = await signInGoogle();
 
       try {
-        await fetch(`${import.meta.env.VITE_API_URL}/users`, {
+        await fetch(`https://garments-tracker-system.vercel.app/users`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -68,7 +68,7 @@ const Login = () => {
             name: result.user.displayName,
             photoURL: result.user.photoURL,
             role: 'buyer', 
-            status: 'pending'
+            status: 'approved'
           })
         });
       } catch (err) {

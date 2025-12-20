@@ -9,7 +9,7 @@ const useUserRole = () => {
   useEffect(() => {
     if (user?.email && !authLoading) {
       setLoading(true);
-      fetch(`${import.meta.env.VITE_API_URL}/users/${user.email}`)
+      fetch(`https://garments-tracker-system.vercel.app/users/${user.email}`)
         .then(res => {
           if (!res.ok) throw new Error('User not found');
           return res.json();

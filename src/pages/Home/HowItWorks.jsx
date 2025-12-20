@@ -14,7 +14,7 @@ const HowItWorks = () => {
   const [steps, setSteps] = useState([]);
 
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_API_URL}/how-it-works`)
+    axios.get('https://garments-tracker-system.vercel.app/how-it-works')
       .then(res => setSteps(res.data))
       .catch(err => console.log(err));
   }, []);

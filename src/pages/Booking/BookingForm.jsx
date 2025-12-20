@@ -15,7 +15,7 @@ const BookingForm = () => {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/products/${id}`)
+    fetch(`https://garments-tracker-system.vercel.app/products/${id}`)
       .then((res) => res.json())
       .then((data) => setProduct(data));
   }, [id]);

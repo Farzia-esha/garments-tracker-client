@@ -25,7 +25,7 @@ const PaymentSuccess = () => {
 
   const verifyPayment = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/verify-payment`, {
+      const response = await fetch(`https://garments-tracker-system.vercel.app/verify-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId })

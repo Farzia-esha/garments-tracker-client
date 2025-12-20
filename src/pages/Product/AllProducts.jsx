@@ -6,7 +6,7 @@ const AllProducts = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/products`)
+    fetch(`https://garments-tracker-system.vercel.app/products`)
       .then(res => res.json())
       .then(data => setProducts(data))
       .catch(err => console.log(err));

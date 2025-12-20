@@ -47,7 +47,7 @@ const Testimonial = () => {
   useEffect(() => {
     const fetchFeedbacks = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/testimonials`); // your backend endpoint
+        const res = await axios.get('https://garments-tracker-system.vercel.app/testimonials'); // your backend endpoint
         setFeedbacks(res.data);
       } catch (err) {
         console.error(err);

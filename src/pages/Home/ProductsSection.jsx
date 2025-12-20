@@ -5,7 +5,7 @@ const ProductsSection = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/products/home`)
+    fetch(`https://garments-tracker-system.vercel.app/products/home`)
       .then(res => res.json())
       .then(data => setProducts(data))
       .catch(err => console.log(err));

@@ -14,7 +14,7 @@ const MyProfile = () => {
   useEffect(() => {
     if (!user?.email) return;
 
-    fetch(`${import.meta.env.VITE_API_URL}/users/${user.email}`)
+    fetch(`https://garments-tracker-system.vercel.app/users/${user.email}`)
       .then(res => res.json())
       .then(data => {
         setUserData(data);

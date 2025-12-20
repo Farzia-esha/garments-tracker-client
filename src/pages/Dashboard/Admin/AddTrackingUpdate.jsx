@@ -58,7 +58,7 @@ const AddTrackingUpdate = ({ bookingId, onSuccess }) => {
       };
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/tracking/${bookingId}`,
+        `https://garments-tracker-system.vercel.app/tracking/${bookingId}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

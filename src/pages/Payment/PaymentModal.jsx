@@ -9,7 +9,7 @@ const PaymentModal = ({ open, onClose, bookingData }) => {
 
   const handleCashOnDelivery = async () => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
+      await fetch(`https://garments-tracker-system.vercel.app/bookings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bookingData),
@@ -25,7 +25,7 @@ const PaymentModal = ({ open, onClose, bookingData }) => {
 
   const handlePayOnline = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/create-checkout-session`, {
+      const res = await fetch(`https://garments-tracker-system.vercel.app/create-checkout-session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ bookingData }),

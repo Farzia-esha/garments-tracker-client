@@ -17,7 +17,7 @@ const TrackOrders = () => {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/bookings/${user.email}`);
+      const res = await fetch(`https://garments-tracker-system.vercel.app/bookings/${user.email}`);
       const data = await res.json();
       // Filter only paid orders
       const paidOrders = data.filter(o => o.paymentStatus?.toLowerCase() === 'paid');
