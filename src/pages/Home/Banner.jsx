@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ChevronLeft, ChevronRight, Star} from 'lucide-react';
+import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Star} from 'lucide-react';
 
 const Banner = () => {
   const [banners, setBanners] = useState([]);
@@ -31,8 +31,9 @@ const Banner = () => {
   const goToSlide = (index) => setCurrentSlide(index);
 
   return (
-    <section className="relative min-h-screen overflow-hidden bg-gray-900">
+    <section className="relative h-[85vh] overflow-hidden bg-gray-900">
       <div className="absolute inset-0">
+      {/* <div className="relative z-10 container mx-auto px-4 h-full flex items-center"> */}
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSlide}
@@ -75,6 +76,7 @@ const Banner = () => {
           </AnimatePresence>
         </div>
       </div>
+      
 
       <div className="absolute inset-y-0 left-0 right-0 z-20 flex items-center justify-between px-4 pointer-events-none">
         <button onClick={prevSlide} className="pointer-events-auto w-12 h-12 bg-white/20 rounded-full flex items-center justify-center"><ChevronLeft size={28} /></button>
@@ -86,6 +88,17 @@ const Banner = () => {
           <button key={index} onClick={() => goToSlide(index)} className={`${index === currentSlide ? 'w-12 h-3 bg-yellow-400 rounded-full' : 'w-3 h-3 bg-white/50 rounded-full'}`} />
         ))}
       </div>
+      {/* Scroll Indicator */}
+<motion.div
+  initial={{ opacity: 0, y: 0 }}
+  animate={{ opacity: 1, y: [0, 10, 0] }}
+  transition={{ repeat: Infinity, duration: 1.5 }}
+  className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 text-white/70 flex flex-col items-center"
+>
+  <span className=" mb-1">Scroll</span>
+  <ChevronDown size={25} />
+</motion.div>
+
     </section>
   );
 };

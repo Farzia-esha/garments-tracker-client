@@ -38,7 +38,11 @@ const Navbar = () => {
   const afterLoginLinks = [
     { name: 'Home', path: '/', icon: <Home size={18} /> },
     { name: 'All Product', path: '/all-products', icon: <Package size={18} /> },
+    { name: 'About Us', path: '/about', icon: <Info size={18} /> },
+    { name: 'Contact', path: '/contact', icon: <Mail size={18} /> },
     { name: 'Dashboard', path: getDashboardLink(), icon: <LayoutDashboard size={18} /> }
+
+
   ];
 
   const navLinks = isLoggedIn ? afterLoginLinks : beforeLoginLinks;

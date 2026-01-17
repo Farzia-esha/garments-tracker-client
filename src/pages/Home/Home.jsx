@@ -5,6 +5,11 @@ import Testimonial from './testimonial';
 import ProductsSection from './ProductsSection';
 import WhyChooseUs from './WhyChooseUs';
 import StatsSection from '../../Components/Shared/StatsSection';
+import CTASection from './Extra/CTASection';
+import FAQSection from './Extra/FAQSection';
+import NewsletterSection from './Extra/NewsletterSection';
+import CategoriesSection from './Extra/CategoriesSection';
+import BlogSection from './Extra/BlogSection';
 
 const Home = () => {
     return (
@@ -15,6 +20,12 @@ const Home = () => {
             <HowItWorks></HowItWorks>
             <StatsSection></StatsSection>
             <Testimonial></Testimonial>
+            <CategoriesSection/>
+            <BlogSection />
+            <FAQSection />
+            {/* <NewsletterSection/> */}
+            <CTASection />
+            
             
         </div>
     );
