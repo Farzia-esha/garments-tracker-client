@@ -1,8 +1,8 @@
 # Garments Order & Production Tracker System
 
 ## Live Site
-- **Client:** [Insert Client Live Link]  
-- **Server:** [Insert Server Live Link]  
+- **Client:** [ https://charming-florentine-ba9143.netlify.app ]  
+- **Server:** [https://garments-tracker-system.vercel.app ]  
 
 ---
 
