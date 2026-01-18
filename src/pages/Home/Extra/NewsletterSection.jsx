@@ -90,7 +90,6 @@ const NewsletterSection = () => {
           </button>
         </form>
 
-        {/* Thank you message */}
         {submitted && (
           <p className="mt-4 text-green-600 font-semibold">
             Thank you for subscribing!
